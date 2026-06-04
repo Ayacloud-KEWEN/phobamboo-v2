@@ -5,10 +5,7 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-2">
-            <div class="flex flex-col items-center">
-              <i class="fa-solid fa-bowl-food"></i>
-              <div class="w-6 h-1 bg-white rounded-full mt-1"></div>
-            </div>
+            <img :src="cfg.logo" alt="logo" class="w-10 h-10 rounded-full object-cover bg-white/90 shadow-sm" />
             <div>
               <h1 class="text-xl font-bold">{{ cfg.name }}</h1>
               <p class="text-xs opacity-80 hidden sm:block">PUTEAUX-LA DÉFENSE</p>

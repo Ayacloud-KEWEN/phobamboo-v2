@@ -5,7 +5,7 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-3 cursor-pointer" @click="scrollTop">
-            <i class="fa-solid fa-bowl-food text-2xl"></i>
+            <img :src="cfg.logo" alt="logo" class="w-10 h-10 rounded-full object-cover bg-white/90 shadow-sm" />
             <div>
               <h1 class="text-xl font-bold tracking-wide">{{ cfg.name }}</h1>
               <p class="text-[10px] opacity-90 uppercase tracking-wider">Puteaux - La Défense</p>
