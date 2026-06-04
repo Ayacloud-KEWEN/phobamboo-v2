@@ -38,9 +38,7 @@
         <p>{{ t('menu.loading') }}</p>
       </div>
       <div v-else-if="!visible.length" class="text-center py-20 text-gray-400">{{ t('menu.empty') }}</div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-10">
-        <ProductCard v-for="p in visible" :key="p.id" :product="p" orderable @add="cart.add($event)" />
-      </div>
+      <MenuItems v-else :category="category" orderable class="pb-10" @add="cart.add($event)" />
     </main>
 
     <!-- Floating cart bar -->
@@ -72,7 +70,7 @@ import { useCartStore } from '../stores/cart';
 import { useMemberStore } from '../stores/member';
 import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 import CategoryTabs from '../components/CategoryTabs.vue';
-import ProductCard from '../components/ProductCard.vue';
+import MenuItems from '../components/MenuItems.vue';
 import CartDrawer from '../components/CartDrawer.vue';
 import LoyaltyModal from '../components/LoyaltyModal.vue';
 

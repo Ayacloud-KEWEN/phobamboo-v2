@@ -1,43 +1,42 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col fade-in">
-    <div class="relative h-40 bg-gray-100">
+  <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100 flex flex-col h-full fade-in group">
+    <div class="relative h-48 overflow-hidden">
       <img
-        v-if="product.image"
-        :src="product.image"
+        :src="product.image || '/NA.png'"
         :alt="name"
         loading="lazy"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      <div v-else class="w-full h-full flex items-center justify-center text-gray-300">
-        <i class="fa-solid fa-bowl-food text-4xl"></i>
-      </div>
-      <div class="absolute top-2 left-2 flex gap-1">
-        <span v-if="product.popular" class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-          <i class="fas fa-star mr-0.5"></i>{{ t('tags.popular') }}
+      <!-- Tags -->
+      <div class="absolute top-3 left-3 flex flex-wrap gap-1">
+        <span v-if="product.popular" class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold shadow-sm">
+          <i class="fas fa-star text-[10px] mr-1"></i>{{ t('tags.popular') }}
         </span>
-        <span v-if="product.spicy" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-          <i class="fas fa-pepper-hot mr-0.5"></i>{{ t('tags.spicy') }}
+        <span v-if="product.spicy" class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold shadow-sm">
+          <i class="fas fa-pepper-hot text-[10px] mr-1"></i>{{ t('tags.spicy') }}
         </span>
-        <span v-if="product.vegan" class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-          <i class="fas fa-leaf mr-0.5"></i>{{ t('tags.vegan') }}
+        <span v-if="product.vegan" class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold shadow-sm">
+          <i class="fas fa-leaf text-[10px] mr-1"></i>{{ t('tags.vegan') }}
         </span>
       </div>
+      <!-- Price badge -->
+      <div class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md border border-gray-100">
+        <span class="text-lg font-bold bamboo-text">{{ product.price.toFixed(2) }}€</span>
+      </div>
+      <!-- Add button (ordering page only) -->
+      <button
+        v-if="orderable"
+        @click="$emit('add', product)"
+        class="absolute bottom-3 left-3 bamboo-bg text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 active:scale-95 transition"
+        :aria-label="t('order.add')"
+      >
+        <i class="fas fa-plus"></i>
+      </button>
     </div>
 
-    <div class="p-4 flex flex-col flex-1">
-      <h3 class="font-bold text-gray-800 leading-snug">{{ name }}</h3>
-      <p v-if="product.description" class="text-sm text-gray-500 mt-1 line-clamp-2">{{ product.description }}</p>
-      <div class="mt-auto pt-3 flex items-center justify-between">
-        <span class="text-lg font-extrabold bamboo-text">{{ product.price.toFixed(2) }} €</span>
-        <button
-          v-if="orderable"
-          @click="$emit('add', product)"
-          class="bamboo-bg text-white w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 active:scale-95 transition"
-          :aria-label="t('order.add')"
-        >
-          <i class="fas fa-plus"></i>
-        </button>
-      </div>
+    <div class="p-5 flex-1 flex flex-col">
+      <h3 class="text-lg font-bold text-gray-800 leading-tight mb-1">{{ name }}</h3>
+      <p v-if="product.description" class="text-gray-500 text-sm leading-relaxed">{{ product.description }}</p>
     </div>
   </div>
 </template>

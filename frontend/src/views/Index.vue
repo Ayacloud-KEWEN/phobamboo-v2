@@ -13,14 +13,13 @@
           </div>
 
           <div class="flex items-center gap-2">
+            <a href="#infos" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full transition items-center backdrop-blur-sm border border-white/10 hidden sm:flex">
+              <i class="fas fa-circle-info mr-2 text-sm"></i><span class="text-sm font-bold">{{ t('nav.infos') }}</span>
+            </a>
+            <a href="tel:0760736465" class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-full transition flex items-center backdrop-blur-sm border border-white/10">
+              <i class="fas fa-phone text-sm sm:mr-2"></i><span class="text-sm font-bold hidden sm:inline">{{ t('nav.reserve') }}</span>
+            </a>
             <LanguageSwitcher />
-            <router-link
-              to="/order"
-              class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full transition flex items-center backdrop-blur-sm font-bold text-sm"
-            >
-              <i class="fas fa-utensils mr-2 text-sm"></i>
-              <span class="hidden sm:inline">{{ t('order.add') }}</span>
-            </router-link>
           </div>
         </div>
         <CategoryTabs v-model="category" :categories="categories" mobile />
@@ -42,9 +41,7 @@
       </div>
       <div v-else-if="menu.error" class="text-center py-20 text-red-500">{{ t('menu.error') }}</div>
       <div v-else-if="!visible.length" class="text-center py-20 text-gray-400">{{ t('menu.empty') }}</div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10">
-        <ProductCard v-for="p in visible" :key="p.id" :product="p" />
-      </div>
+      <MenuItems v-else :category="category" class="pb-10" />
     </main>
 
     <CustomerFooter />
@@ -58,7 +55,7 @@ import { useMenuStore } from '../stores/menu';
 import { useConfigStore } from '../stores/config';
 import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 import CategoryTabs from '../components/CategoryTabs.vue';
-import ProductCard from '../components/ProductCard.vue';
+import MenuItems from '../components/MenuItems.vue';
 import CustomerFooter from '../components/CustomerFooter.vue';
 
 const { t } = useI18n();
