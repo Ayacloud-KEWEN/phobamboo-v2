@@ -1,0 +1,46 @@
+{
+  "nav": { "menu": "Notre Carte", "infos": "Infos", "reserve": "Réserver", "pdf": "Menu PDF" },
+  "menu": {
+    "title": "Notre Carte",
+    "subtitle": "Découvrez les saveurs authentiques du Vietnam et de la Thaïlande, cuisinées maison avec des produits frais.",
+    "loading": "Chargement de la carte...",
+    "error": "Impossible de charger le menu.",
+    "empty": "Aucun plat dans cette catégorie."
+  },
+  "categories": {
+    "menus": "Plats spéciaux",
+    "plats": "Plats",
+    "entrees": "Entrées",
+    "boissons": "Boissons",
+    "alcool": "Alcools",
+    "desserts": "Desserts"
+  },
+  "tags": { "popular": "Populaire", "spicy": "Épicé", "vegan": "Végan" },
+  "order": {
+    "table": "Table",
+    "takeaway": "À emporter",
+    "add": "Ajouter",
+    "cart": "Panier",
+    "empty": "Votre panier est vide",
+    "total": "Total",
+    "notes": "Remarques (allergies, etc.)",
+    "send": "Envoyer la commande",
+    "sending": "Envoi...",
+    "sent": "Commande envoyée !",
+    "quantity": "Quantité"
+  },
+  "loyalty": {
+    "title": "Fidélité",
+    "points": "Points",
+    "login": "Connexion membre",
+    "phone": "Numéro de téléphone",
+    "loginBtn": "Se connecter",
+    "guest": "Continuer sans compte",
+    "smsConsent": "J'accepte de recevoir des offres par SMS",
+    "yourPoints": "Vos points",
+    "rewards": "Récompenses",
+    "redeem": "Échanger",
+    "notEnough": "Points insuffisants"
+  },
+  "common": { "close": "Fermer", "confirm": "Confirmer", "cancel": "Annuler", "back": "Retour" }
+}

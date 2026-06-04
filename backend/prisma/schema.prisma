@@ -1,0 +1,128 @@
+// PhoBamboo PostgreSQL schema — migrated from Firebase Firestore.
+// Reusable across restaurants: per-restaurant content lives in RestaurantConfig.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Menu
+// ---------------------------------------------------------------------------
+model Product {
+  id           String   @id @default(cuid())
+  nameZh       String   @default("")
+  nameEn       String   @default("")
+  nameFr       String   @default("")
+  price        Float    @default(0)
+  category     String   @default("")
+  subCategory  String   @default("")
+  description  String   @default("")
+  image        String   @default("")
+  popular      Boolean  @default(false)
+  spicy        Boolean  @default(false)
+  vegan        Boolean  @default(false)
+  available    Boolean  @default(true)
+  comboOptions Json     @default("[]") // array of entree product ids for "menus" category
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category])
+  @@index([available])
+}
+
+model Reward {
+  id        String   @id @default(cuid())
+  nameZh    String   @default("")
+  nameEn    String   @default("")
+  nameFr    String   @default("")
+  cost      Int      @default(0) // points required
+  image     String   @default("")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cost])
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+enum OrderStatus {
+  pending // sent to counter, awaiting kitchen/service
+  completed // food delivered / ready
+  paid // customer paid, points credited
+  cancelled
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  table         String      @default("") // table number, empty = takeaway/walk-in
+  phone         String      @default("") // member phone, empty = guest
+  items         Json        @default("[]") // [{ name, quantity, price }]
+  total         Float       @default(0)
+  notes         String      @default("")
+  status        OrderStatus @default(pending)
+  pointsToEarn  Int         @default(0) // estimate shown to customer at order time
+  pointsAwarded Int         @default(0) // points actually credited at payment
+  pointsSpent   Int         @default(0)
+  createdAt     DateTime    @default(now())
+  paidAt        DateTime?
+
+  // phone is a soft reference to Member.phone (empty = guest). No FK so guest
+  // orders with empty phone are allowed; counter looks up members separately.
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+// ---------------------------------------------------------------------------
+// Members (loyalty)
+// ---------------------------------------------------------------------------
+model Member {
+  phone      String   @id // phone number is the natural key
+  points     Int      @default(0)
+  acceptsSMS Boolean  @default(false)
+  name       String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Admin / Auth
+// ---------------------------------------------------------------------------
+enum AdminRole {
+  owner
+  staff
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String
+  role         AdminRole @default(staff)
+  createdAt    DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Restaurant config (the reusable core — new restaurant edits this row)
+// ---------------------------------------------------------------------------
+model RestaurantConfig {
+  id              Int     @id @default(1)
+  name            String  @default("PhoBamboo")
+  logo            String  @default("/logo.png")
+  primaryColor    String  @default("#16a34a")
+  defaultLocale   String  @default("fr") // fr | en | zh
+  currency        String  @default("EUR")
+  pointsPerEuro   Float   @default(1) // loyalty earn rate (points per euro)
+  pointsThreshold Float   @default(20) // min daily cumulative spend to earn points
+  kdsEnabled      Boolean @default(false) // optional kitchen module, off by default
+  whatsapp        String  @default("")
+  updatedAt       DateTime @updatedAt @default(now())
+}

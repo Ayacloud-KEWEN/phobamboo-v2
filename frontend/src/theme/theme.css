@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   Reusable theme tokens. To reskin for another restaurant, change these vars
+   (or set them at runtime from RestaurantConfig.primaryColor in main.js).
+   =========================================================================== */
+:root {
+  --bamboo-primary: #2d5a27;
+  --bamboo-secondary: #4a7c59;
+  --bamboo-light: #8a9a5b;
+  --bamboo-accent: #c9d4a2;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  @apply bg-gray-50 text-gray-800 font-sans antialiased;
+}
+
+/* Brand helpers preserved from the original site */
+.bamboo-gradient {
+  background: linear-gradient(135deg, var(--bamboo-primary) 0%, var(--bamboo-secondary) 100%);
+}
+.bamboo-text {
+  color: var(--bamboo-primary);
+}
+.bamboo-bg {
+  background-color: var(--bamboo-primary);
+}
+
+/* Category pills */
+.category-active {
+  background-color: var(--bamboo-primary) !important;
+  color: #fff !important;
+}
+.category-inactive {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+  border: 1px solid #e5e7eb;
+}
+.category-active-mobile {
+  background-color: #fff !important;
+  color: var(--bamboo-primary) !important;
+}
+.category-inactive-mobile {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Animations + utilities */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

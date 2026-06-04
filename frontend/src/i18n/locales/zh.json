@@ -1,0 +1,46 @@
+{
+  "nav": { "menu": "菜单", "infos": "信息", "reserve": "预订", "pdf": "PDF菜单" },
+  "menu": {
+    "title": "我们的菜单",
+    "subtitle": "品尝正宗越南与泰国风味，新鲜食材，自家烹制。",
+    "loading": "菜单加载中...",
+    "error": "无法加载菜单。",
+    "empty": "此分类暂无菜品。"
+  },
+  "categories": {
+    "menus": "特色套餐",
+    "plats": "主菜",
+    "entrees": "前菜",
+    "boissons": "饮料",
+    "alcool": "酒水",
+    "desserts": "甜点"
+  },
+  "tags": { "popular": "热门", "spicy": "辣", "vegan": "素食" },
+  "order": {
+    "table": "桌号",
+    "takeaway": "外带",
+    "add": "加入",
+    "cart": "购物车",
+    "empty": "购物车是空的",
+    "total": "合计",
+    "notes": "备注（过敏等）",
+    "send": "提交订单",
+    "sending": "提交中...",
+    "sent": "订单已提交！",
+    "quantity": "数量"
+  },
+  "loyalty": {
+    "title": "会员积分",
+    "points": "积分",
+    "login": "会员登录",
+    "phone": "手机号码",
+    "loginBtn": "登录",
+    "guest": "以游客身份继续",
+    "smsConsent": "我同意接收短信优惠信息",
+    "yourPoints": "您的积分",
+    "rewards": "奖励兑换",
+    "redeem": "兑换",
+    "notEnough": "积分不足"
+  },
+  "common": { "close": "关闭", "confirm": "确认", "cancel": "取消", "back": "返回" }
+}

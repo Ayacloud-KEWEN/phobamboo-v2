@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pho Bamboo - Commande & Fidélité</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+
+    <style>
+        :root {
+            --bamboo-primary: #2d5a27;
+            --bamboo-secondary: #4a7c59;
+            --bamboo-light: #8a9a5b;
+            --bamboo-accent: #c9d4a2;
+        }
+
+        .bamboo-bg {
+            background-color: var(--bamboo-primary) !important;
+        }
+
+        .bamboo-gradient {
+            background: linear-gradient(135deg, var(--bamboo-primary) 0%, var(--bamboo-secondary) 100%);
+        }
+
+        .bamboo-text {
+            color: var(--bamboo-primary);
+        }
+
+        .bamboo-border {
+            border-color: var(--bamboo-light);
+        }
+
+        .category-active {
+            background-color: var(--bamboo-primary) !important;
+            color: white !important;
+        }
+
+        .category-inactive {
+            background-color: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: 1px solid #e5e7eb;
+        }
+
+        .category-inactive-mobile {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        .add-btn {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .add-btn-success {
+            background-color: #10b981 !important;
+            color: white !important;
+        }
+
+        .add-btn-pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .bamboo-pattern {
+            background-image: linear-gradient(90deg, transparent 79px, #abcea1 79px, #abcea1 81px, transparent 81px), linear-gradient(#eee .1em, transparent .1em);
+            background-size: 100% 1.2em;
+            background-color: #f9f7f0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .fade-in-overlay {
+            animation: fadeInOp 0.2s forwards;
+        }
+
+        .fade-in-modal {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeInOp {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800" style="touch-action: manipulation;">
+    <nav class="bamboo-gradient text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="flex flex-col items-center"><i class="fa-solid fa-bowl-food"></i>
+                        <div class="w-6 h-1 bg-white rounded-full mt-1"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Pho Bamboo</h1>
+                        <p class="text-xs opacity-80 hidden sm:block">PUTEAUX-LA DÉFENSE</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-1 bg-white/20 px-2 py-1 rounded-lg text-sm cursor-pointer hover:bg-white/30 transition"
+                        onclick="manualEditTable()">
+                        <i class="fas fa-table text-xs"></i><span id="table-number" class="font-medium">---</span><i
+                            class="fas fa-pen text-[10px] ml-1 opacity-70"></i>
+                    </div>
+                    <button onclick="toggleCart()" id="cart-button" class="relative touch-target">
+                        <div class="flex items-center bg-white/20 px-3 py-2 rounded-lg"><i
+                                class="fas fa-shopping-cart"></i><span id="cart-count" class="ml-2 font-bold">0</span>
+                        </div>
+                        <div id="cart-indicator"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">
+                            <span id="cart-indicator-count">!</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-categories" class="sm:hidden py-3 border-t border-white/20">
+                <div class="flex overflow-x-auto scrollbar-hide space-x-2 pb-2">
+
+                    <button onclick="filterCategory('menus')" data-category="menus"
+                        class="category-btn category-active-mobile flex-shrink-0 px-4 py-2 rounded-full">Plats
+                        spéciaux</button>
+                    <button onclick="filterCategory('plats')" data-category="plats"
+                        class="category-btn category-inactive-mobile flex-shrink-0 px-4 py-2 rounded-full">Plats</button>
+                    <button onclick="filterCategory('entrees')" data-category="entrees"
+                        class="category-btn category-inactive-mobile flex-shrink-0 px-4 py-2 rounded-full">Entrées</button>
+                    <button onclick="filterCategory('boissons')" data-category="boissons"
+                        class="category-btn category-inactive-mobile flex-shrink-0 px-4 py-2 rounded-full">Boissons</button>
+                    <button onclick="filterCategory('alcool')" data-category="alcool"
+                        class="category-btn category-inactive-mobile flex-shrink-0 px-4 py-2 rounded-full">Alcools</button>
+                    <button onclick="filterCategory('desserts')" data-category="desserts"
+                        class="category-btn category-inactive-mobile flex-shrink-0 px-4 py-2 rounded-full">Desserts</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-4 pb-24">
+        <div class="mb-6">
+            <div class="bg-white rounded-2xl shadow-sm p-5 bamboo-pattern">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold bamboo-text mb-1">Bienvenue</h2>
+                        <p class="text-gray-600 text-mobile">Spécialités VIET & THAÏ</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow cursor-pointer active:scale-95 transition"
+                        onclick="userPhone ? openLoyaltyModal() : promptLogin()">
+                        <div class="flex items-center"><i class="fas fa-crown text-yellow-500 mr-2"></i>
+                            <div>
+                                <p class="text-xs text-gray-500">Mes Points</p>
+                                <p class="font-bold bamboo-text" id="user-points">---</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden sm:flex space-x-2 mt-6">
+
+                    <button onclick="filterCategory('menus')" data-category="menus"
+                        class="category-btn category-active flex-shrink-0 px-4 py-2 rounded-full">Plats
+                        spéciaux</button>
+                    <button onclick="filterCategory('plats')" data-category="plats"
+                        class="category-btn category-inactive flex-shrink-0 px-4 py-2 rounded-full">Plats</button>
+                    <button onclick="filterCategory('entrees')" data-category="entrees"
+                        class="category-btn category-inactive flex-shrink-0 px-4 py-2 rounded-full">Entrées</button>
+                    <button onclick="filterCategory('boissons')" data-category="boissons"
+                        class="category-btn category-inactive flex-shrink-0 px-4 py-2 rounded-full">Boissons</button>
+                    <button onclick="filterCategory('alcool')" data-category="alcool"
+                        class="category-btn category-inactive flex-shrink-0 px-4 py-2 rounded-full">Alcools</button>
+                    <button onclick="filterCategory('desserts')" data-category="desserts"
+                        class="category-btn category-inactive flex-shrink-0 px-4 py-2 rounded-full">Desserts</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-grid" class="menu-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+        <div class="fixed bottom-20 right-4 z-30">
+            <div class="flex flex-col space-y-2">
+                <button onclick="scrollToTop()"
+                    class="touch-target w-12 h-12 rounded-full bamboo-gradient text-white shadow-lg flex items-center justify-center"><i
+                        class="fas fa-arrow-up"></i></button>
+                <button onclick="showQRInfo()"
+                    class="touch-target w-12 h-12 rounded-full bg-white bamboo-border border text-gray-700 shadow-lg flex items-center justify-center"><i
+                        class="fas fa-qrcode"></i></button>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-4px_15px_rgba(0,0,0,0.05)] z-40">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-2 h-16 divide-x divide-gray-100">
+
+                <button onclick="toggleCart()"
+                    class="relative touch-target flex flex-col items-center justify-center h-full active:bg-gray-50 transition-colors">
+                    <div class="relative">
+                        <i class="fas fa-shopping-cart text-2xl bamboo-text mb-1"></i>
+                        <div id="bottom-cart-indicator"
+                            class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center hidden shadow-md border-2 border-white">
+                            <span id="bottom-cart-count">0</span>
+                        </div>
+                    </div>
+                    <span class="text-sm font-bold bamboo-text">Mon Panier</span>
+                </button>
+
+                <button onclick="userPhone ? openLoyaltyModal() : promptLogin()"
+                    class="flex flex-col items-center justify-center touch-target h-full active:bg-gray-50 transition-colors">
+                    <i class="fas fa-crown text-2xl text-yellow-500 drop-shadow-sm mb-1"></i>
+                    <span class="text-sm font-bold text-gray-700">Fidélité</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="cart-sidebar"
+        class="fixed top-0 right-0 w-full sm:w-96 h-full bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
+        <div class="h-full flex flex-col">
+            <div class="bamboo-gradient text-white p-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3"><button onclick="toggleCart()"
+                            class="touch-target w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10"><i
+                                class="fas fa-arrow-left"></i></button>
+                        <h3 class="text-xl font-bold">Votre Commande</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm opacity-90">Table <span id="cart-table-number">---</span></p>
+                    </div>
+                </div>
+                <div class="mt-6 bg-white/10 rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p id="cart-item-count" class="text-sm">0 articles</p>
+                            <p id="cart-points-earned" class="text-xs opacity-90">+0 points</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold" id="cart-sidebar-total">0€</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="cart-items" class="flex-1 overflow-y-auto p-4"></div>
+            <div class="border-t p-4 bg-gray-50">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2"><label
+                            class="text-gray-700 font-medium">Instructions spéciales</label><button
+                            onclick="showCommonInstructions()" class="text-xs bamboo-text">Suggestions</button></div>
+                    <textarea id="order-notes"
+                        class="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                        rows="2" placeholder="Ex: Sans coriandre, extra piment, allergies..."></textarea>
+                </div>
+                <div class="space-y-3"><button id="checkout-btn" onclick="checkoutDirect()"
+                        class="w-full bamboo-gradient text-white py-4 px-5 rounded-xl font-bold shadow-xl touch-target flex items-center justify-center transition-transform active:scale-95 hover:opacity-90">
+                        <i class="fas fa-paper-plane mr-2 text-xl"></i><span class="text-lg">Commander & Envoyer</span>
+                    </button>
+                    <p class="text-[10px] text-gray-400 text-center leading-tight px-2 mt-4"><span
+                            class="block mb-1">Paiement au comptoir après le repas</span>En commandant, vous acceptez
+                        nos CGV.<br>Vos points de fidélité sont calculés automatiquement.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+
+    <div id="qr-modal"
+        class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden transition-opacity">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
+            <div class="bamboo-gradient text-white p-5 flex justify-between items-center">
+                <h3 class="text-xl font-bold flex items-center"><i class="fas fa-info-circle mr-2"></i> Pho Bamboo</h3>
+                <button onclick="closeQRModal()"
+                    class="text-white bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center transition-colors"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <div class="p-6 space-y-5">
+                <div>
+                    <h4 class="font-bold text-gray-800 flex items-center mb-1"><i
+                            class="fas fa-map-marker-alt text-green-600 w-5 text-center mr-2"></i>Nous trouver</h4>
+                    <p class="text-sm text-gray-600 pl-7 leading-relaxed">
+                        Galerie commerciale de la Gare RER La Défense, Parv. de l'arche<br>
+                        <span class="font-medium text-gray-800">92800 Puteaux</span>
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-800 flex items-center mb-2"><i
+                            class="fas fa-clock text-green-600 w-5 text-center mr-2"></i>Horaires</h4>
+                    <div class="text-sm text-gray-600 pl-7 space-y-1">
+                        <p class="flex justify-between border-b border-gray-100 pb-1">
+                            <span>Lundi - Samedi</span> <span class="font-bold text-gray-800">11:00 - 21:00</span>
+                        </p>
+                        <p class="flex justify-between text-red-500 pt-1">
+                            <span>Dimanche</span> <span class="font-bold">Fermé</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-gray-800 flex items-center mb-1"><i
+                            class="fas fa-phone-alt text-green-600 w-5 text-center mr-2"></i>Contact</h4>
+                    <p class="text-lg font-black text-green-700 pl-7 tracking-wide">07 60 73 64 65</p>
+                    <p class="text-xs text-amber-600 pl-7 italic mt-1 font-medium"><i class="fas fa-bell mr-1"></i>
+                        Réservation conseillée le midi.</p>
+                </div>
+
+                <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-center mt-2">
+                    <p class="text-xs text-gray-400">Pour commander, scannez le QR code sur votre table.</p>
+                </div>
+
+                <button onclick="closeQRModal()"
+                    class="w-full bamboo-gradient text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform">Fermer</button>
+            </div>
+        </div>
+    </div>
+    <div id="loyalty-modal"
+        class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-end sm:items-center justify-center hidden transition-opacity duration-300">
+        <div
+            class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl transform transition-transform duration-300">
+            <div class="bamboo-gradient p-6 text-white relative"><button onclick="logoutUser()"
+                    class="absolute top-4 left-4 text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded backdrop-blur-sm transition-colors"><i
+                        class="fas fa-sign-out-alt mr-1"></i> Changer</button><button onclick="closeLoyaltyModal()"
+                    class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"><i
+                        class="fas fa-times"></i></button>
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-inner text-yellow-500">
+                        <i class="fas fa-crown text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Fidélité Pho Bamboo</h3>
+                        <p class="opacity-90 text-sm">Mangez, cumulez, profitez !</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex items-baseline"><span class="text-4xl font-bold"
+                        id="modal-points-display">0</span><span class="ml-2 text-sm opacity-80">points
+                        disponibles</span></div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs mb-1 opacity-90"><span>Prochaine récompense</span><span
+                            id="next-reward-points">200 pts</span></div>
+                    <div class="w-full bg-black/20 rounded-full h-2">
+                        <div id="points-progress-bar" class="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-gray-50 max-h-[50vh] overflow-y-auto">
+
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 shadow-sm">
+                    <h4 class="font-bold text-blue-800 text-sm mb-1 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Comment gagner des points ?
+                    </h4>
+                    <ul class="text-xs text-blue-700 space-y-1 ml-1">
+                        <li>💰 <span class="font-bold">1 € = 1 Point</span></li>
+                        <li>🚀 Les points se débloquent dès <span
+                                class="font-bold text-blue-900 bg-blue-100 px-1 rounded">20 €</span> cumulés dans la
+                            journée.</li>
+                        <li class="opacity-80 italic">(Vos commandes Midi + Soir s'additionnent !)</li>
+                        <li class="opacity-80 italic">*Points calculés sur le total arrondi à l’entier inférieur.</li>
+                    </ul>
+                </div>
+
+                <div class="h-8"></div>
+
+                <h4 class="font-bold text-gray-700 mb-4 flex items-center text-sm uppercase tracking-wide">
+                    <i class="fas fa-gift text-red-500 mr-2"></i> Récompenses
+                </h4>
+
+                <div id="rewards-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+    <div id="notification"
+        class="fixed top-4 right-4 bg-white border-l-4 border-green-500 text-gray-800 p-4 rounded-lg shadow-xl transform translate-x-full transition-transform duration-300 z-[60] max-w-sm flex items-start">
+        <i class="fas fa-check-circle text-green-500 text-xl mr-3 mt-1"></i>
+        <div>
+            <p class="font-bold text-sm" id="notification-title">Succès</p>
+            <p id="notification-message" class="text-xs mt-1 text-gray-500"></p>
+        </div>
+    </div>
+    <div id="bamboo-modal" class="fixed inset-0 z-[70] hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0 fade-in-overlay"
+            aria-hidden="true"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div
+                    class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-xs opacity-0 scale-95 fade-in-modal border-2 bamboo-border">
+                    <div class="bamboo-gradient h-3 w-full"></div>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                <h3 class="text-lg font-bold leading-6 bamboo-text mb-2" id="bamboo-modal-title">Titre
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500" id="bamboo-modal-message">Description...</p>
+                                </div>
+                                <div id="bamboo-modal-input-container" class="mt-4 hidden"><input type="text"
+                                        id="bamboo-modal-input"
+                                        class="w-full border-2 border-gray-200 rounded-xl p-3 text-lg text-center font-bold focus:border-green-600 focus:ring-0 outline-none transition-colors"
+                                        placeholder="..."></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 flex gap-3 justify-center">
+                        <button type="button" id="bamboo-modal-confirm"
+                            class="inline-flex w-full justify-center rounded-xl bamboo-gradient px-3 py-3 text-sm font-bold text-white shadow-sm hover:opacity-90 sm:ml-3 sm:w-auto touch-target">Confirmer</button><button
+                            type="button" id="bamboo-modal-cancel"
+                            class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-3 py-3 text-sm font-bold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto touch-target hidden">Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="combo-modal"
+        class="fixed inset-0 bg-black/70 z-50 hidden flex items-end sm:items-center justify-center fade-in-overlay transition-all">
+        <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl relative">
+            <div class="bamboo-gradient p-5 text-white">
+                <h3 class="text-xl font-bold" id="combo-title">Menu Pho</h3>
+                <p class="text-sm opacity-90">Envie d'une entrée avec votre plat ?</p>
+                <button onclick="closeComboModal()"
+                    class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 w-8 h-8 rounded-full flex items-center justify-center"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <div class="p-6 bg-gray-50">
+                <label
+                    class="flex items-center justify-between bg-white p-4 rounded-xl border-2 border-green-500 cursor-pointer mb-4 shadow-sm"
+                    id="label-no-combo">
+                    <span class="font-bold text-gray-700">Juste le plat (Pas d'entrée)</span>
+                    <input type="radio" name="combo-choice" value="none" class="w-5 h-5 text-green-600" checked
+                        onchange="updateComboUI()">
+                </label>
+
+                <label
+                    class="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 cursor-pointer mb-3 shadow-sm hover:border-green-300"
+                    id="label-with-combo">
+                    <span class="font-bold text-gray-700 flex items-center"><i
+                            class="fas fa-utensils text-yellow-500 mr-2"></i> Formule Entrée (+3.80€)</span>
+                    <input type="radio" name="combo-choice" value="combo" class="w-5 h-5 text-green-600"
+                        onchange="updateComboUI()">
+                </label>
+
+                <div id="sub-options" class="hidden grid grid-cols-3 gap-2 mt-2">
+
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-gray-100">
+                <button onclick="confirmCombo()"
+                    class="w-full bamboo-gradient text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex justify-between px-6">
+                    <span>Ajouter au panier</span>
+                    <span id="combo-total-price">-- €</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./firebase-config.js"></script>
+
+    <script>
+
+        const COMBO_PRICE_ADDITION = 3.80; 
+
+        let modalCallback = null;
+        function showBambooPrompt(t, m, p, cb) { setupModal(t, m, true, true); const i = document.getElementById('bamboo-modal-input'); i.value = ''; i.placeholder = p || ''; i.type = "tel"; modalCallback = cb; document.getElementById('bamboo-modal-input').focus(); }
+        function showBambooConfirm(t, m, cb) { setupModal(t, m, true, false); modalCallback = cb; }
+        function showBambooAlert(t, m, cb) { setupModal(t, m, false, false); modalCallback = cb; }
+        function setupModal(t, m, sc, si) { document.getElementById('bamboo-modal-title').textContent = t; document.getElementById('bamboo-modal-message').innerHTML = m.replace(/\n/g, '<br>'); const c = document.getElementById('bamboo-modal-cancel'), i = document.getElementById('bamboo-modal-input-container'); if (sc) c.classList.remove('hidden'); else c.classList.add('hidden'); if (si) { i.classList.remove('hidden'); setTimeout(() => document.getElementById('bamboo-modal-input').focus(), 100); } else { i.classList.add('hidden'); } document.getElementById('bamboo-modal').classList.remove('hidden'); }
+        function closeBambooModal() { document.getElementById('bamboo-modal').classList.add('hidden'); modalCallback = null; }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('bamboo-modal-confirm').addEventListener('click', () => { const v = document.getElementById('bamboo-modal-input').value; const iv = !document.getElementById('bamboo-modal-input-container').classList.contains('hidden'); const cb = modalCallback; closeBambooModal(); if (cb) { if (iv) cb(v); else cb(true); } });
+            document.getElementById('bamboo-modal-cancel').addEventListener('click', () => { const cb = modalCallback; closeBambooModal(); if (cb) cb(false); });
+        });
+
+
+        let menuData = [], rewardsData = [], cart = JSON.parse(localStorage.getItem('phoBambooCart')) || [], currentCategory = 'menus', activeAddButtons = new Set(), userPhone = localStorage.getItem('phoBambooUserPhone');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initTableNumber(); updateCartDisplay(); updateCategoryButtons();
+
+            setTimeout(() => {
+                loadMenuData();
+                checkUserLogin();
+            }, 500);
+        });
+
+
+        async function loadMenuData() {
+            if (!window.db) { setTimeout(loadMenuData, 500); return; }
+
+            try {
+                const productQ = window.Firestore.query(
+                    window.Firestore.collection(window.db, "Products")
+                );
+                const productSnap = await window.Firestore.getDocs(productQ);
+
+                menuData = [];
+                productSnap.forEach(doc => {
+                    menuData.push({ id: doc.id, ...doc.data() });
+                });
+
+                menuData.sort((a, b) => a.name_fr.localeCompare(b.name_fr));
+
+                const rewardSnap = await window.Firestore.getDocs(window.Firestore.collection(window.db, "Rewards"));
+                rewardsData = [];
+                rewardSnap.forEach(doc => {
+                    rewardsData.push({ id: doc.id, ...doc.data() });
+                });
+
+                console.log("Firebase Menu Loaded (All):", menuData.length);
+                renderMenu();
+            } catch (error) {
+                console.error("Load Menu Error:", error);
+                document.getElementById('menu-grid').innerHTML = `<div class="p-8 text-center text-red-500">Erreur de chargement du menu</div>`;
+            }
+        }
+
+        async function checkUserLogin() { if (!userPhone) document.getElementById('user-points').textContent = "---"; else await fetchUserPoints(); }
+        function fetchUserPoints(marketingConsent = null) { 
+            if (!userPhone || !window.db) return;
+
+            const { doc, onSnapshot, setDoc, updateDoc, serverTimestamp } = window.Firestore;
+            const userRef = doc(window.db, "Users", userPhone);
+
+            onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const pts = data.points || 0;
+
+                    document.getElementById('user-points').textContent = pts;
+                    const modalDisplay = document.getElementById('modal-points-display');
+                    if (modalDisplay) modalDisplay.textContent = pts;
+
+                    if (!document.getElementById('loyalty-modal').classList.contains('hidden')) {
+                        updateLoyaltyUI();
+                    }
+
+                    if (marketingConsent !== null && data.acceptsSMS !== marketingConsent) {
+                        updateDoc(userRef, { acceptsSMS: marketingConsent });
+
+                        marketingConsent = null;
+                    }
+
+                } else {
+
+                    const initialConsent = marketingConsent === null ? false : marketingConsent;
+
+                    setDoc(userRef, {
+                        points: 0,
+                        acceptsSMS: initialConsent,
+                        createdAt: serverTimestamp()
+                    });
+                    document.getElementById('user-points').textContent = 0;
+                }
+            });
+        }
+
+        async function updateUserPoints(change) {
+            if (!userPhone || !window.db) return;
+
+            let cur = parseInt(document.getElementById('user-points').textContent) || 0;
+
+            let disp = cur + change;
+            if (disp < 0) disp = 0;
+
+            document.getElementById('user-points').textContent = disp;
+            if (document.getElementById('modal-points-display')) {
+                document.getElementById('modal-points-display').textContent = disp;
+            }
+
+            try {
+                const { doc, updateDoc } = window.Firestore;
+                const userRef = doc(window.db, "Users", userPhone);
+
+                await updateDoc(userRef, { points: disp });
+
+            } catch (e) {
+                console.error("Err update pts", e);
+                fetchUserPoints();
+            }
+        }
+        function promptLogin() {
+            const title = "Fidélité Pho Bamboo";
+            const message = "Entrez votre numéro de téléphone pour cumuler des points à chaque commande :";
+
+            setupModal(title, message, true, true);
+
+            const input = document.getElementById('bamboo-modal-input');
+            input.value = '';
+            input.placeholder = "Ex: 0612345678";
+            input.type = "tel";
+
+            let consentDiv = document.getElementById('gdpr-consent-container');
+            if (!consentDiv) {
+                consentDiv = document.createElement('div');
+                consentDiv.id = 'gdpr-consent-container';
+                consentDiv.className = "mt-4 space-y-3 fade-in w-full text-left";
+
+                consentDiv.innerHTML = `
+            <label for="gdpr-loyalty" class="flex items-start p-3 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-green-500 transition-colors shadow-sm relative overflow-hidden group">
+                <div class="flex items-center h-5 mt-0.5">
+                    <input type="checkbox" id="gdpr-loyalty" class="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                </div>
+                <div class="ml-3 flex-1">
+                    <span class="text-sm font-bold text-gray-800 flex items-center">
+                        Compte Fidélité <span class="text-red-500 ml-1 font-black text-lg leading-none">*</span>
+                    </span>
+                    <span class="text-xs text-gray-500 mt-1 block leading-tight">
+                        J'accepte les <a href="/politique-confidentialite.html" target="_blank" class="text-green-700 font-bold underline hover:text-green-800">CGU et la Politique de confidentialité</a>.
+                    </span>
+                </div>
+            </label>
+
+            <label for="gdpr-marketing" class="flex items-start p-3 bg-gray-50 border border-gray-100 rounded-xl cursor-pointer hover:bg-white hover:border-green-300 transition-all shadow-sm">
+                <div class="flex items-center h-5 mt-0.5">
+                    <input type="checkbox" id="gdpr-marketing" class="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                </div>
+                <div class="ml-3 flex-1">
+                    <span class="text-sm font-bold text-gray-700 flex items-center">
+                        <i class="fas fa-gift text-yellow-500 mr-2"></i> Offres & Promos
+                    </span>
+                    <span class="text-xs text-gray-500 mt-1 block leading-tight">
+                        J'accepte de recevoir des réductions et actualités de Pho Bamboo par SMS.
+                    </span>
+                </div>
+            </label>
+        `;
+                document.getElementById('bamboo-modal-input-container').appendChild(consentDiv);
+            }
+            consentDiv.classList.remove('hidden');
+
+            const loyaltyCheckbox = document.getElementById('gdpr-loyalty');
+            const marketingCheckbox = document.getElementById('gdpr-marketing');
+
+            loyaltyCheckbox.checked = false;
+            marketingCheckbox.checked = false;
+
+            const confirmBtn = document.getElementById('bamboo-modal-confirm');
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-50', 'pointer-events-none');
+
+            const checkboxHandler = (e) => {
+                if (e.target.checked) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    confirmBtn.disabled = true;
+                    confirmBtn.classList.add('opacity-50', 'pointer-events-none');
+                }
+            };
+            loyaltyCheckbox.addEventListener('change', checkboxHandler);
+
+            modalCallback = (phone) => {
+                consentDiv.classList.add('hidden');
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-50', 'pointer-events-none');
+                loyaltyCheckbox.removeEventListener('change', checkboxHandler);
+
+                const isMarketingChecked = marketingCheckbox.checked;
+
+                if (!phone) return;
+
+                phone = phone.trim().replace(/\s/g, '');
+                if (phone.length === 9 && !phone.startsWith('0')) phone = '0' + phone;
+                if (phone.length !== 10 || !phone.startsWith('0')) {
+                    showBambooAlert("Invalide", "10 chiffres requis (ex: 06...)", () => promptLogin());
+                    return;
+                }
+
+                userPhone = phone;
+                localStorage.setItem('phoBambooUserPhone', userPhone);
+                showNotification("Connexion réussie", "Chargement de vos points...");
+
+                fetchUserPoints(isMarketingChecked);
+            };
+
+            setTimeout(() => input.focus(), 100);
+        }
+        function logoutUser() {
+            showBambooConfirm("Déconnexion", "Changer de numéro ?", (yes) => {
+                if (yes) {
+                    localStorage.removeItem('phoBambooUserPhone'); userPhone = null;
+                    document.getElementById('user-points').textContent = "---";
+                    if (document.getElementById('modal-points-display')) document.getElementById('modal-points-display').textContent = "0";
+                    closeLoyaltyModal(); showNotification("Déconnecté", "Nouveau numéro requis.");
+                }
+            });
+        }
+        function validateOrder() { if (cart.length === 0) { showNotification('Panier vide', 'Ajoutez des plats'); return false; } return true; }
+
+        function checkoutDirect() {
+            if (!validateOrder()) return;
+
+            const processOrder = async () => {
+                const btn = document.getElementById('checkout-btn');
+                const originalBtnHtml = btn.innerHTML;
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'pointer-events-none');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 text-xl"></i><span class="text-lg">Envoi en cours...</span>';
+
+                const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+                const pointsEarned = total < 20 ? 0 : Math.floor(total);
+
+                const pointsToSpend = cart.reduce((s, i) => s + (i.pointsCost || 0), 0);
+
+                const table = document.getElementById('table-number').textContent;
+                const notes = document.getElementById('order-notes').value;
+                showNotification('Envoi...', 'Connexion au serveur...');
+
+                try {
+                    const { collection, addDoc, serverTimestamp } = window.Firestore;
+
+                    if (pointsToSpend > 0) {
+                        const currentPts = parseInt(document.getElementById('user-points').textContent) || 0;
+                        if (currentPts < pointsToSpend) {
+                            throw new Error("Points insuffisants pour valider cette commande.");
+                        }
+
+                        await updateUserPoints(-pointsToSpend);
+                    }
+
+
+                    await addDoc(collection(window.db, "Orders"), {
+                        table: table,
+                        phone: userPhone || "Non renseigné",
+                        items: cart.map(i => ({ name: i.name_fr, quantity: i.quantity, price: i.price })),
+                        total: parseFloat(total.toFixed(2)),
+                        notes: notes,
+                        status: "pending",
+                        pointsToEarn: pointsEarned,
+                        createdAt: serverTimestamp()
+                    });
+
+                    showBambooAlert("Succès", "✅ Commande envoyée !", () => { finalizeOrder(total, false); });
+                } catch (error) {
+                    console.error("Firebase Error:", error);
+
+                    showBambooAlert("Erreur", "Problème : " + error.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                    btn.innerHTML = originalBtnHtml;
+                }
+            };
+
+            if (!userPhone) {
+                showBambooConfirm("Pas de points ?", "Continuer sans gagner de points ?", (yes) => { if (yes) processOrder(); else promptLogin(); });
+            } else {
+                processOrder();
+            }
+        }
+        function finalizeOrder(totalAmount, pointsHandledByBackend) {
+            cart = []; saveCart(); updateCartDisplay(); toggleCart();
+            document.getElementById('order-notes').value = ''; renderMenu();
+        }
+        function initTableNumber() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tableParam = urlParams.get('table');
+            const t = document.getElementById('table-number'), c = document.getElementById('cart-table-number');
+            if (tableParam) { t.textContent = "T" + tableParam; c.textContent = tableParam; sessionStorage.setItem('phoBambooTable', tableParam); }
+            else { const s = sessionStorage.getItem('phoBambooTable'); if (s) { t.textContent = "T" + s; c.textContent = s; } else { t.textContent = "---"; c.textContent = "---"; } }
+        }
+        function manualEditTable() {
+            const curr = document.getElementById('table-number').textContent.replace('T', '');
+            showBambooPrompt("Table", "Numéro de table :", curr === "---" ? "" : curr, (n) => {
+                if (n && n.trim()) { document.getElementById('table-number').textContent = "T" + n; document.getElementById('cart-table-number').textContent = n; sessionStorage.setItem('phoBambooTable', n); }
+            });
+        }
+
+        function renderMenu() {
+            const g = document.getElementById('menu-grid');
+            g.innerHTML = '';
+
+            let f = currentCategory === 'all' ? menuData : menuData.filter(d => d.category === currentCategory);
+
+            f = f.filter(d => d.available === true);
+
+            if (f.length === 0) {
+                g.innerHTML = `<div class="col-span-full text-center py-12 opacity-50">Aucun plat disponible</div>`;
+                return;
+            }
+
+            const categoriesWithSub = ['menus', 'plats', 'boissons', 'alcool'];
+            const showSub = categoriesWithSub.includes(currentCategory);
+
+            let groups = {};
+            if (showSub) {
+                f.forEach(d => {
+                    const key = d.sub_category || 'General';
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(d);
+                });
+            } else {
+                groups['General'] = f;
+            }
+
+            Object.keys(groups).sort().forEach(groupKey => {
+                const items = groups[groupKey];
+                if (items.length === 0) return;
+
+                if (showSub && groupKey !== 'General') {
+                    g.innerHTML += `
+            <div class="col-span-full mt-5 mb-2 px-2 flex items-center fade-in">
+                <div class="h-4 w-1 bg-green-600 rounded-full mr-2"></div>
+                <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">${groupKey}</h3>
+                <div class="ml-3 h-px bg-gray-200 flex-1"></div>
+            </div>`;
+                }
+
+                items.forEach(d => {
+                    const q = (cart.find(i => i.id === d.id) || {}).quantity || 0;
+                    const isDrink = (d.category === 'boissons' || d.category === 'alcool');
+                    let html = '';
+
+                    if (isDrink) {
+                        html = `
+                <div class="col-span-full bg-white border-b border-gray-100 p-3 flex items-center justify-between fade-in hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center flex-1 min-w-0 pr-3">
+                        ${d.image ? `<img src="${d.image}" class="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0 mr-3 border border-gray-200">` : ''}
+                        <div class="flex flex-col">
+                            <div class="flex items-center">
+                                <h3 class="font-bold text-gray-800 text-sm truncate mr-2">${d.name_fr}</h3>
+                                ${d.popular ? '<i class="fas fa-star text-[10px] text-amber-500"></i>' : ''}
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-sm font-bold bamboo-text mr-2">${parseFloat(d.price).toFixed(2)}€</span>
+                                ${d.name_vn ? `<span class="text-xs text-gray-400 italic truncate">- ${d.name_vn}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <button id="add-btn-${d.id}" onclick="addToCart('${d.id}', 1, this)" 
+                        class="add-btn touch-target flex-shrink-0 bamboo-gradient text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center transition-transform active:scale-90">
+                        ${q > 0 ? `<span class="font-bold text-xs">${q}</span>` : '<i class="fas fa-plus text-xs"></i>'}
+                    </button>
+                </div>`;
+                    } else {
+                        let tags = '';
+                        if (d.popular) tags += '<span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold mr-2 shadow-sm"><i class="fas fa-star text-[10px] mr-1"></i>POP</span>';
+                        if (d.spicy) tags += '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold mr-2 shadow-sm"><i class="fas fa-pepper-hot text-[10px] mr-1"></i>HOT</span>';
+                        if (d.vegan) tags += '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold shadow-sm"><i class="fas fa-leaf text-[10px] mr-1"></i>VÉGÉ</span>';
+
+                        html = `
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden fade-in border bamboo-border relative flex flex-col h-full">
+                    <div class="relative h-48 flex-shrink-0">
+                        <img src="${d.image || './NA.png'}" class="w-full h-full object-cover">
+                        <div class="absolute top-3 left-3 flex gap-1 flex-wrap">${tags}</div>
+                        <div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow">
+                            <span class="text-xl font-bold bamboo-text">${parseFloat(d.price).toFixed(2)}€</span>
+                        </div>
+                    </div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="mb-2">
+                            <h3 class="text-lg font-bold bamboo-text leading-tight">${d.name_fr}</h3>
+                            <p class="text-sm text-gray-600 italic">${d.name_vn || ''}</p>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">${d.description || ''}</p>
+                        <div class="flex items-center justify-between mt-auto pt-2">
+                            <div class="text-xs text-gray-500 flex items-center">
+                                <i class="fas fa-coins text-amber-500 mr-1"></i> ${Math.floor(d.price)} pts
+                            </div>
+                            <button id="add-btn-${d.id}" onclick="addToCart('${d.id}', 1, this)" 
+                                class="add-btn touch-target bamboo-gradient text-white px-4 py-2.5 rounded-lg font-bold text-sm flex items-center shadow-md">
+                                <i class="fas fa-plus mr-2"></i> ${q > 0 ? `Ajouter (${q})` : 'Ajouter'}
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+                    }
+
+                    g.innerHTML += html;
+                });
+            });
+        }
+        let currentComboDish = null;
+
+        function addToCart(id, qty, btn) {
+            const d = menuData.find(x => x.id === id);
+            if (!d) return;
+
+            if (d.combo_options && d.combo_options.length > 0) {
+                currentComboDish = d;
+                openComboModal(d);
+                return;
+            }
+
+            if (btn) provideButtonFeedback(btn);
+            const i = cart.find(x => x.id === id && !x.isReward);
+            if (i) i.quantity += qty;
+            else cart.push({ id: d.id, name_fr: d.name_fr, price: parseFloat(d.price), quantity: qty, image: d.image, isReward: false });
+
+            saveCart();
+            updateCartDisplay();
+            updateMenuQuantityBadge(id, i ? i.quantity : qty);
+            if (!btn) showNotification('Ajouté', d.name_fr);
+        }
+
+
+        function openComboModal(dish) {
+            document.getElementById('combo-title').textContent = dish.name_fr;
+            currentComboDish = dish;
+
+            const subOptionsDiv = document.getElementById('sub-options');
+            subOptionsDiv.innerHTML = '';
+
+            const validEntreeIds = dish.combo_options || [];
+
+            let realEntrees = menuData.filter(p => {
+                return validEntreeIds.some(linkedId => String(linkedId).trim() === String(p.id).trim());
+            });
+
+            if (realEntrees.length === 0) {
+
+
+                document.getElementById('label-with-combo').classList.add('hidden');
+                document.querySelector('input[name="combo-choice"][value="none"]').checked = true;
+
+                updateComboUI();
+
+                document.getElementById('combo-modal').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('label-with-combo').classList.remove('hidden');
+
+            realEntrees.forEach((opt, index) => {
+                const isChecked = index === 0 ? 'checked' : '';
+
+                subOptionsDiv.innerHTML += `
+        <label class="text-center cursor-pointer group">
+            <input type="radio" name="sub-choice" value="${opt.name_fr}" class="hidden" ${isChecked} onchange="updateSubChoiceUI()">
+            <div class="sub-choice-card border-2 rounded-lg p-2 transition-all ${index === 0 ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white'} h-full flex flex-col items-center justify-center">
+                <img src="${opt.image || './NA.png'}" class="w-full h-12 object-cover rounded mb-1 bg-white border border-gray-100 p-0.5">
+                <span class="text-xs font-bold text-gray-600 line-clamp-2 leading-tight">${opt.name_fr}</span>
+            </div>
+        </label>
+        `;
+            });
+
+            document.querySelector('input[name="combo-choice"][value="none"]').checked = true;
+            updateComboUI();
+
+            document.getElementById('combo-modal').classList.remove('hidden');
+        }
+
+        function closeComboModal() {
+            document.getElementById('combo-modal').classList.add('hidden');
+            currentComboDish = null;
+        }
+
+        function updateComboUI() {
+            const isCombo = document.querySelector('input[name="combo-choice"]:checked').value === "combo";
+            document.getElementById('sub-options').classList.toggle('hidden', !isCombo);
+
+            document.getElementById('label-no-combo').className = `flex items-center justify-between bg-white p-4 rounded-xl border-2 ${!isCombo ? 'border-green-500' : 'border-gray-200'} cursor-pointer mb-4 shadow-sm`;
+            document.getElementById('label-with-combo').className = `flex items-center justify-between bg-white p-4 rounded-xl border-2 ${isCombo ? 'border-green-500' : 'border-gray-200'} cursor-pointer mb-3 shadow-sm`;
+
+            let finalPrice = parseFloat(currentComboDish.price);
+            if (isCombo) finalPrice += COMBO_PRICE_ADDITION;
+            document.getElementById('combo-total-price').textContent = finalPrice.toFixed(2) + " €";
+        }
+
+        function updateSubChoiceUI() {
+            const allInputs = document.querySelectorAll('input[name="sub-choice"]');
+
+            allInputs.forEach(input => {
+                const card = input.nextElementSibling; 
+                if (input.checked) {
+                    card.classList.remove('border-gray-200', 'bg-white');
+                    card.classList.add('border-green-500', 'bg-green-50');
+                } else {
+                    card.classList.remove('border-green-500', 'bg-green-50');
+                    card.classList.add('border-gray-200', 'bg-white');
+                }
+            });
+        }
+
+        function confirmCombo() {
+            const isCombo = document.querySelector('input[name="combo-choice"]:checked').value === "combo";
+            const subChoice = document.querySelector('input[name="sub-choice"]:checked').value;
+
+            let finalName = currentComboDish.name_fr;
+            let finalPrice = parseFloat(currentComboDish.price);
+            let uniqueId = currentComboDish.id;
+
+            if (isCombo) {
+                finalName = `${currentComboDish.name_fr} (+ ${subChoice})`; 
+                finalPrice += COMBO_PRICE_ADDITION;
+                uniqueId = `${currentComboDish.id}_${subChoice}`; 
+            }
+
+            const existing = cart.find(x => x.id === uniqueId && !x.isReward);
+            if (existing) existing.quantity += 1;
+            else cart.push({ id: uniqueId, name_fr: finalName, price: finalPrice, quantity: 1, image: currentComboDish.image, isReward: false });
+
+            saveCart(); updateCartDisplay(); closeComboModal();
+        }
+        function updateCartDisplay() {
+            const c = cart.reduce((s, i) => s + i.quantity, 0), t = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            document.getElementById('cart-count').textContent = c; document.getElementById('bottom-cart-count').textContent = c;
+            document.getElementById('cart-indicator-count').textContent = c > 9 ? '9+' : c; document.getElementById('cart-sidebar-total').textContent = `${t.toFixed(2)}€`;
+            document.getElementById('cart-item-count').textContent = `${c} article${c > 1 ? 's' : ''}`;
+
+            if (t < 20) {
+                document.getElementById('cart-points-earned').textContent = "(Min. 20€ pour points)";
+                document.getElementById('cart-points-earned').classList.add('text-gray-400'); 
+                document.getElementById('cart-points-earned').classList.remove('text-green-600');
+            } else {
+                document.getElementById('cart-points-earned').textContent = `+${Math.floor(t)} pts`;
+                document.getElementById('cart-points-earned').classList.remove('text-gray-400');
+                document.getElementById('cart-points-earned').classList.add('text-green-600'); 
+            }
+            const inds = [document.getElementById('cart-indicator'), document.getElementById('bottom-cart-indicator')];
+            inds.forEach(e => c > 0 ? e.classList.remove('hidden') : e.classList.add('hidden')); renderCartItems();
+        }
+
+        function renderCartItems() {
+            const el = document.getElementById('cart-items');
+            if (cart.length === 0) { el.innerHTML = `<div class="text-center py-12 fade-in"><p class="bamboo-text font-bold">Panier vide</p></div>`; return; }
+            let h = '';
+            cart.forEach(i => {
+                const r = i.isReward;
+
+                const priceDisplay = r ? `<span class="text-xs bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded font-bold">-${i.pointsCost} pts</span>` : i.price.toFixed(2) + '€';
+
+                h += `<div class="bg-gray-50 rounded-lg p-3 mb-3 fade-in flex items-center ${r ? 'bg-yellow-50' : ''}">
+                <img src="${i.image || './NA.png'}" class="w-14 h-14 object-cover rounded-lg flex-shrink-0">
+                <div class="ml-3 flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate">${i.name_fr}</h4>
+                    <p class="text-xs ${r ? 'text-green-600 font-bold' : 'text-gray-500'}">${priceDisplay}</p>
+                </div>
+                <div class="flex flex-col items-end pl-2">
+                    ${!r ? `<div class="flex items-center space-x-2 mb-1"><button onclick="updateCartItemQuantity('${i.id}', -1)" class="w-6 h-6 rounded-full border bg-white flex justify-center items-center"><i class="fas fa-minus text-[10px]"></i></button><span class="font-bold text-sm w-4 text-center">${i.quantity}</span><button onclick="updateCartItemQuantity('${i.id}', 1)" class="w-6 h-6 rounded-full border bg-white flex justify-center items-center"><i class="fas fa-plus text-[10px]"></i></button></div>` : '<span class="text-xs bg-yellow-200 px-2 py-1 rounded text-yellow-800 font-bold">CADEAU</span>'}
+                    <div class="flex items-center"><span class="font-bold text-sm mr-3">${r ? '' : (i.price * i.quantity).toFixed(2) + '€'}</span><button onclick="removeFromCart('${i.id}')" class="text-red-400"><i class="fas fa-trash text-xs"></i></button></div>
+                </div>
+              </div>`;
+            });
+            el.innerHTML = h;
+        }
+        function updateCartItemQuantity(id, chg) { const i = cart.find(x => x.id === id); if (!i) return; i.quantity += chg; if (i.quantity <= 0) removeFromCart(id); else { saveCart(); updateCartDisplay(); if (!i.isReward) updateMenuQuantityBadge(id, i.quantity); } }
+        function removeFromCart(id) { const idx = cart.findIndex(x => x.id == id); if (idx > -1) { const i = cart[idx]; cart.splice(idx, 1); saveCart(); updateCartDisplay(); if (!i.isReward) updateMenuQuantityBadge(i.id, 0); } }
+        function openLoyaltyModal() { document.getElementById('loyalty-modal').classList.remove('hidden'); updateLoyaltyUI(); }
+        function closeLoyaltyModal() { document.getElementById('loyalty-modal').classList.add('hidden'); }
+        function updateLoyaltyUI() {
+
+            const pts = parseInt(document.getElementById('user-points').textContent) || 0;
+            document.getElementById('modal-points-display').textContent = pts;
+
+
+            const sortedRewards = [...rewardsData].sort((a, b) => a.cost - b.cost);
+
+            const nextReward = sortedRewards.find(r => r.cost > pts);
+
+
+            const nextTargetSpan = document.getElementById('next-reward-points');
+            const progressBar = document.getElementById('points-progress-bar');
+
+            if (nextReward) {
+
+                nextTargetSpan.textContent = nextReward.cost + " pts";
+
+                const percentage = (pts / nextReward.cost) * 100;
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+                progressBar.classList.remove('bg-green-500');
+                progressBar.classList.add('bg-yellow-400'); 
+            } else {
+
+                nextTargetSpan.textContent = "Niveau MAX !";
+                progressBar.style.width = "100%";
+                progressBar.classList.remove('bg-yellow-400');
+                progressBar.classList.add('bg-green-500'); 
+            }
+
+
+            const c = document.getElementById('rewards-list');
+            c.innerHTML = '';
+            sortedRewards.forEach(r => {
+                const can = pts >= r.cost;
+                c.innerHTML += `<div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full ${r.bg} ${r.color} flex justify-center items-center"><i class="fas ${r.icon}"></i></div><div><p class="font-bold text-sm">${r.name}</p><p class="text-xs ${can ? 'text-green-600' : 'text-gray-400'}">${r.cost} pts</p></div></div><button onclick="redeemReward('${r.id}')" ${!can ? 'disabled' : ''} class="px-3 py-2 rounded-lg font-bold text-xs ${can ? 'bg-green-500 text-white shadow-lg active:scale-95' : 'bg-gray-200 text-gray-400'}">${can ? 'Obtenir' : 'Bloqué'}</button></div>`;
+            });
+        }
+
+        function redeemReward(id) {
+            const r = rewardsData.find(x => x.id === id);
+            const pts = parseInt(document.getElementById('user-points').textContent) || 0;
+
+            const pointsInCart = cart.reduce((sum, item) => sum + (item.pointsCost || 0), 0);
+
+            if (pts < r.cost + pointsInCart) {
+                showBambooAlert("Solde insuffisant", "Vous avez déjà des récompenses dans le panier qui utilisent vos points.");
+                return;
+            }
+
+            showBambooConfirm("Utiliser les points ?", `Dépenser ${r.cost} pts pour : ${r.name} ?`, (yes) => {
+                if (yes) {
+
+
+                    cart.push({
+                        id: `reward-${Date.now()}`,
+                        name_fr: `🎁 ${r.name}`,
+                        price: 0,
+                        quantity: 1,
+                        image: "./gift.png",
+                        isReward: true,
+                        pointsCost: r.cost 
+                    });
+
+                    saveCart();
+                    updateCartDisplay();
+                    closeLoyaltyModal();
+                    toggleCart();
+
+                    showBambooAlert("Ajouté au panier", "Les points seront déduits lors de la validation de la commande.");
+                }
+            });
+        }
+        function provideButtonFeedback(btn) { if (activeAddButtons.has(btn.id)) return; activeAddButtons.add(btn.id); btn.classList.add('add-btn-pulse', 'add-btn-success'); const h = btn.innerHTML; btn.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(() => { btn.classList.remove('add-btn-success', 'add-btn-pulse'); btn.innerHTML = h; activeAddButtons.delete(btn.id); }, 800); }
+        function updateMenuQuantityBadge(id, q) { const b = document.getElementById(`add-btn-${id}`); if (b) b.innerHTML = `<i class="fas fa-plus mr-2"></i> ${q > 0 ? 'Ajouter +' : 'Ajouter'}`; }
+        function toggleCart() { const s = document.getElementById('cart-sidebar'), o = document.getElementById('cart-overlay'); if (!s.classList.contains('translate-x-full')) { s.classList.add('translate-x-full'); o.classList.add('hidden'); document.body.style.overflow = ''; } else { s.classList.remove('translate-x-full'); o.classList.remove('hidden'); document.body.style.overflow = 'hidden'; } }
+        function filterCategory(c) { currentCategory = c; updateCategoryButtons(); renderMenu(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function updateCategoryButtons() { document.querySelectorAll('.category-btn').forEach(b => { const a = b.dataset.category === currentCategory, m = b.closest('#mobile-categories'); b.className = `category-btn flex-shrink-0 px-4 py-2 rounded-full ${a ? 'category-active' : (m ? 'category-inactive-mobile' : 'category-inactive')}`; }); }
+        function showCommonInstructions() { const n = document.getElementById('order-notes'), s = ["Sans coriandre", "Extra piment", "Sauce à part", "Bien cuit"], r = s[Math.floor(Math.random() * s.length)]; n.value = n.value ? n.value + ', ' + r : r; }
+        function saveCart() { localStorage.setItem('phoBambooCart', JSON.stringify(cart)); }
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function showQRInfo() { document.getElementById('qr-modal').classList.remove('hidden'); }
+        function closeQRModal() { document.getElementById('qr-modal').classList.add('hidden'); }
+        function showNotification(t, m) { const e = document.getElementById('notification'); document.getElementById('notification-title').textContent = t; document.getElementById('notification-message').textContent = m; e.classList.remove('translate-x-full'); setTimeout(() => e.classList.add('translate-x-full'), 3000); }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+{
+  "nav": { "menu": "Our Menu", "infos": "Info", "reserve": "Book", "pdf": "PDF Menu" },
+  "menu": {
+    "title": "Our Menu",
+    "subtitle": "Discover authentic Vietnamese and Thai flavors, homemade with fresh ingredients.",
+    "loading": "Loading menu...",
+    "error": "Unable to load the menu.",
+    "empty": "No dishes in this category."
+  },
+  "categories": {
+    "menus": "Specials",
+    "plats": "Mains",
+    "entrees": "Starters",
+    "boissons": "Drinks",
+    "alcool": "Alcohol",
+    "desserts": "Desserts"
+  },
+  "tags": { "popular": "Popular", "spicy": "Spicy", "vegan": "Vegan" },
+  "order": {
+    "table": "Table",
+    "takeaway": "Takeaway",
+    "add": "Add",
+    "cart": "Cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "notes": "Notes (allergies, etc.)",
+    "send": "Send order",
+    "sending": "Sending...",
+    "sent": "Order sent!",
+    "quantity": "Quantity"
+  },
+  "loyalty": {
+    "title": "Loyalty",
+    "points": "Points",
+    "login": "Member login",
+    "phone": "Phone number",
+    "loginBtn": "Log in",
+    "guest": "Continue as guest",
+    "smsConsent": "I agree to receive offers by SMS",
+    "yourPoints": "Your points",
+    "rewards": "Rewards",
+    "redeem": "Redeem",
+    "notEnough": "Not enough points"
+  },
+  "common": { "close": "Close", "confirm": "Confirm", "cancel": "Cancel", "back": "Back" }
+}

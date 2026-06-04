@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMPTOIR</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 深蓝色主题 */
+        body {
+            background-color: #0f172a;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .fade-out {
+            transition: all 0.5s ease;
+            opacity: 0;
+            transform: scale(0.95);
+            height: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        /* Tab 样式 */
+        .tab-active {
+            background-color: #2563eb;
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-inactive {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        /* 🟢 修复后的打印样式 */
+        @media print {
+
+            /* 1. 隐藏 body 下的所有一级子元素 */
+            body>* {
+                display: none !important;
+            }
+
+            /* 2. 唯独把 #print-area 显现出来 */
+            /* 使用 !important 强制覆盖 Tailwind 的 .hidden 类 */
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+                color: black;
+                z-index: 9999;
+                /* 确保在最上层 */
+            }
+
+            /* 3. 确保打印区域内部的内容可见 */
+            #print-area * {
+                visibility: visible !important;
+                display: block;
+                /* 或者是 inline-block/flex，视情况而定 */
+            }
+
+            /* 4. 去掉页眉页脚（网址、时间等），仅Chrome/Edge有效 */
+            @page {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col p-4">
+
+    <div id="login-overlay" class="fixed inset-0 bg-gray-900 z-50 flex flex-col items-center justify-center">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-700 w-80">
+            <div class="w-16 h-16 bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <i class="fas fa-lock text-2xl text-blue-500"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-6 text-white text-center" id="login-title">Connexion</h2>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">Email / Compte</label>
+                    <input type="email" id="login-email" required
+                        class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">Mot de passe</label>
+                    <input type="password" id="login-password" required
+                        class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none">
+                </div>
+                <button type="submit" id="login-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg active:scale-95 transition-all">
+                    SE CONNECTER
+                </button>
+                <p id="login-error" class="text-red-500 text-xs text-center hidden">Identifiants incorrects.</p>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-content" class="w-full hidden flex-col max-w-7xl mx-auto h-full">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold tracking-wide mr-6">COMPTOIR</h1>
+
+                <div class="flex space-x-2">
+                    <button onclick="switchTab('caisse')" id="btn-tab-caisse"
+                        class="tab-active px-4 py-2 rounded-lg font-bold border transition-all flex items-center">
+                        <i class="fas fa-cash-register mr-2"></i> Caisse
+                    </button>
+                    <button onclick="switchTab('users')" id="btn-tab-users"
+                        class="tab-inactive px-4 py-2 rounded-lg font-bold border transition-all flex items-center">
+                        <i class="fas fa-users mr-2"></i> Fidélité
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4" id="header-stats">
+                <div class="text-right mr-4 hidden sm:block">
+                    <p class="text-xs text-slate-400">En attente</p>
+                    <p class="text-xl font-bold text-green-400" id="total-pending">0.00€</p>
+                </div>
+                <button onclick="window.location.reload()"
+                    class="bg-slate-800 hover:bg-slate-700 p-3 rounded-lg transition">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="panel-caisse" class="w-full">
+            <div id="counter-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="col-span-full text-center text-slate-500 py-20 flex flex-col items-center">
+                    <i class="fas fa-mug-hot text-4xl mb-4 opacity-50"></i>
+                    <span class="text-xl">En attente de clients...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-users" class="w-full hidden max-w-lg mx-auto">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h2 class="text-lg font-bold mb-4 text-slate-300 border-b border-slate-700 pb-2">Gestion Client</h2>
+
+                <div class="flex gap-2 mb-6">
+                    <input type="tel" id="admin-phone" placeholder="Numéro (ex: 0612345678)"
+                        class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-3 text-white text-lg outline-none focus:border-blue-500 transition-colors">
+                    <button onclick="searchUser()"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-5 rounded-xl text-xl shadow-lg active:scale-95 transition-transform">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <div id="user-actions" class="hidden">
+                    <div class="bg-slate-700/50 rounded-xl p-6 text-center mb-6 border border-slate-600">
+                        <p class="text-sm text-slate-400 uppercase tracking-wide mb-1">Solde Actuel</p>
+                        <div class="text-5xl font-black text-yellow-400 mb-2"><span id="current-points">0</span> <span
+                                class="text-xl">pts</span></div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-400 mb-2">Modification Rapide</h3>
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button onclick="changePoints(100)"
+                            class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg font-bold border border-slate-600">+100
+                            pts</button>
+                        <button onclick="changePoints(200)"
+                            class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg font-bold border border-slate-600">+200
+                            pts</button>
+                        <button onclick="changePoints(-200)"
+                            class="bg-red-900/30 hover:bg-red-900/50 text-red-200 p-3 rounded-lg font-bold border border-red-900/50">-200
+                            pts</button>
+                        <button onclick="changePoints(-500)"
+                            class="bg-red-900/30 hover:bg-red-900/50 text-red-200 p-3 rounded-lg font-bold border border-red-900/50">-500
+                            pts</button>
+                    </div>
+
+                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                        <label class="block text-xs text-slate-500 mb-2 uppercase tracking-wide">Ajustement
+                            Manuel</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="custom-points-input" placeholder="+ / -"
+                                class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white outline-none focus:border-blue-500">
+                            <button onclick="applyCustomPoints()"
+                                class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                VALIDER
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="user-loading" class="hidden text-center py-4 text-slate-500">
+                    <i class="fas fa-spinner fa-spin mr-2"></i> Recherche en cours...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area" class="hidden"></div>
+
+    <div id="global-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center transform transition-all scale-95" id="global-modal-box">
+            
+            <div id="modal-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-slate-700">
+                <i id="modal-icon" class="fas fa-info text-3xl"></i>
+            </div>
+
+            <h3 id="modal-title" class="text-xl font-bold text-white mb-2">Titre</h3>
+            <p id="modal-message" class="text-slate-400 text-sm mb-6 leading-relaxed">Message...</p>
+
+            <div class="flex space-x-3 justify-center">
+                <button id="modal-btn-cancel" class="hidden flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl transition-colors">
+                    Annuler
+                </button>
+                <button id="modal-btn-confirm" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all active:scale-95">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./firebase-config.js"></script>
+
+    <script>
+        // ================= 🔒 真实身份验证 (Firebase Auth) =================
+        function initAuth() {
+            if (!window.auth) { setTimeout(initAuth, 500); return; }
+
+            // 监听登录状态：如果员工昨天登录过，今天打开页面直接进，不用再输密码！
+            window.Auth.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    console.log("Connecté en tant que:", user.email);
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    document.getElementById('main-content').classList.add('flex');
+
+                    // 这里写原本成功进入后应该运行的函数
+                    // kds.html 写: startKDSListener();
+                    startCounterListener();
+                    // menu.html 写: loadProducts(); loadRewards();
+                } else {
+                    document.getElementById('login-overlay').classList.remove('hidden');
+                }
+            });
+        }
+
+        // 提交登录表单
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; err.classList.add('hidden');
+
+            try {
+                // 核心：请求 Firebase 云端验证密码
+                await window.Auth.signInWithEmailAndPassword(window.auth, email, pass);
+                // 成功后，onAuthStateChanged 会自动触发，关闭弹窗并加载数据
+            } catch (error) {
+                err.classList.remove('hidden');
+                err.textContent = "Erreur: Email ou mot de passe incorrect.";
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'SE CONNECTER';
+            }
+        }
+
+        // 页面加载时启动验证监控
+        document.addEventListener('DOMContentLoaded', initAuth);
+
+        // ================= ✨ 通用弹窗控制器 (Promise) =================
+        function showModal(type, title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('global-modal');
+                const box = document.getElementById('global-modal-box');
+                const iconContainer = document.getElementById('modal-icon-container');
+                const icon = document.getElementById('modal-icon');
+                const titleEl = document.getElementById('modal-title');
+                const msgEl = document.getElementById('modal-message');
+                const btnConfirm = document.getElementById('modal-btn-confirm');
+                const btnCancel = document.getElementById('modal-btn-cancel');
+
+                // 1. 设置内容
+                titleEl.textContent = title;
+                msgEl.innerHTML = message.replace(/\n/g, '<br>');
+
+                // 2. 初始化样式 (重置)
+                btnCancel.classList.add('hidden');
+                btnConfirm.className = "flex-1 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all active:scale-95";
+                iconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4";
+
+                // 3. 根据类型配置样式
+                if (type === 'success') {
+                    iconContainer.classList.add('bg-green-500/20');
+                    icon.className = "fas fa-check text-3xl text-green-500";
+                    btnConfirm.classList.add('bg-green-600', 'hover:bg-green-500');
+                    btnConfirm.textContent = "Génial !";
+                } 
+                else if (type === 'error') {
+                    iconContainer.classList.add('bg-red-500/20');
+                    icon.className = "fas fa-times text-3xl text-red-500";
+                    btnConfirm.classList.add('bg-slate-700', 'hover:bg-slate-600'); // 错误提示只需关闭
+                    btnConfirm.textContent = "Fermer";
+                } 
+                else if (type === 'confirm') {
+                    btnCancel.classList.remove('hidden');
+                    iconContainer.classList.add('bg-blue-500/20');
+                    icon.className = "fas fa-question text-3xl text-blue-500";
+                    btnConfirm.classList.add('bg-blue-600', 'hover:bg-blue-500');
+                    btnConfirm.innerHTML = '<i class="fas fa-check mr-2"></i> Confirmer';
+                } 
+                else if (type === 'danger') { // 危险操作 (如取消订单)
+                    btnCancel.classList.remove('hidden');
+                    iconContainer.classList.add('bg-red-500/20');
+                    icon.className = "fas fa-exclamation-triangle text-3xl text-red-500";
+                    btnConfirm.classList.add('bg-red-600', 'hover:bg-red-500');
+                    btnConfirm.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Supprimer';
+                }
+
+                // 4. 显示动画
+                modal.classList.remove('hidden');
+                // 强制重绘以触发 transition
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    box.classList.remove('scale-95');
+                    box.classList.add('scale-100');
+                });
+
+                // 5. 绑定事件 (使用 once 确保只触发一次)
+                const close = (result) => {
+                    box.classList.remove('scale-100');
+                    box.classList.add('scale-95');
+                    modal.classList.add('opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(result); // 返回 true 或 false
+                    }, 200);
+                };
+
+                btnConfirm.onclick = () => close(true);
+                btnCancel.onclick = () => close(false);
+            });
+        }
+
+        // Tab 切换逻辑
+        function switchTab(tab) {
+            const pCaisse = document.getElementById('panel-caisse');
+            const pUsers = document.getElementById('panel-users');
+            const bCaisse = document.getElementById('btn-tab-caisse');
+            const bUsers = document.getElementById('btn-tab-users');
+            const headerStats = document.getElementById('header-stats');
+
+            if (tab === 'caisse') {
+                pCaisse.classList.remove('hidden'); pUsers.classList.add('hidden');
+                bCaisse.className = "tab-active px-4 py-2 rounded-lg font-bold border transition-all flex items-center";
+                bUsers.className = "tab-inactive px-4 py-2 rounded-lg font-bold border transition-all flex items-center";
+                headerStats.classList.remove('hidden');
+            } else {
+                pCaisse.classList.add('hidden'); pUsers.classList.remove('hidden');
+                bCaisse.className = "tab-inactive px-4 py-2 rounded-lg font-bold border transition-all flex items-center";
+                bUsers.className = "tab-active px-4 py-2 rounded-lg font-bold border transition-all flex items-center";
+                headerStats.classList.add('hidden');
+            }
+        }
+
+        // ================= Caisse 逻辑 (监听今天的新订单) =================
+        function startCounterListener() {
+            if (!window.db) { setTimeout(startCounterListener, 500); return; }
+            const { collection, query, where, orderBy, onSnapshot } = window.Firestore;
+
+            // 🔴 1. 获取今天的凌晨 00:00:00 时间戳
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+
+            // 🔴 2. 修改查询条件：加上时间限制，只加载今天的订单
+            const q = query(
+                collection(window.db, "Orders"),
+                where("createdAt", ">=", startOfToday),          // 新增：只看今天及之后创建的
+                where("status", "in", ["pending", "completed"]), // 状态是待处理或已完成的
+                orderBy("createdAt", "asc")                      // 按时间正序排列
+            );
+
+            onSnapshot(q, (snapshot) => {
+                const orders = [];
+                let totalAmount = 0;
+                snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    orders.push({ id: doc.id, ...d });
+                    // 只有 pending (未完成) 的订单才计入“待收金额”
+                    if (d.status === 'pending') {
+                        totalAmount += (d.total || 0);
+                    }
+                });
+                document.getElementById('total-pending').textContent = totalAmount.toFixed(2) + "€";
+                renderCounterOrders(orders);
+            });
+        }
+
+        function renderCounterOrders(orders) {
+            const list = document.getElementById('counter-list');
+            list.innerHTML = '';
+            if (orders.length === 0) { list.innerHTML = `<div class="col-span-full text-center text-slate-500 py-20 flex flex-col items-center"><i class="fas fa-check-circle text-4xl mb-4 text-green-900"></i><span class="text-xl">Tout est encaissé !</span></div>`; return; }
+
+            orders.forEach(order => {
+                const isReady = order.status === 'completed';
+                const statusBadge = isReady
+                    ? `<span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/50 flex items-center"><i class="fas fa-bell mr-1"></i> PRÊT À SERVIR</span>`
+                    : `<span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs font-bold border border-yellow-500/50 flex items-center"><i class="fas fa-fire mr-1"></i> EN CUISINE</span>`;
+
+                let timeStr = "--:--";
+                if (order.createdAt && order.createdAt.toDate) timeStr = order.createdAt.toDate().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                let itemsSummary = "";
+                if (Array.isArray(order.items)) itemsSummary = order.items.map(i => `<div class="flex justify-between text-slate-300 text-sm"><span>${i.quantity}x ${i.name}</span><span>${(i.price * i.quantity).toFixed(2)}</span></div>`).join('');
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-800 rounded-xl border-2 ${isReady ? 'border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-slate-700'} overflow-hidden flex flex-col transition-all hover:border-blue-500`;
+                card.innerHTML = `
+                <div class="p-4 bg-slate-900/50 border-b border-slate-700 flex justify-between items-start">
+                    <div><div class="text-3xl font-black text-white mb-1">${order.table}</div><div class="text-xs text-slate-400 font-mono">${timeStr}</div></div>
+                    <div class="flex space-x-3">
+                        <div class="flex flex-col items-end space-y-2">${statusBadge}${order.phone && order.phone.length > 4 ? `<div class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300"><i class="fas fa-user mr-1"></i>${order.phone}</div>` : ''}</div>
+                        <button onclick="cancelOrder('${order.id}', this)" class="text-red-500 p-3 active:scale-90 transition-transform" title="Annuler">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 flex-grow space-y-1 overflow-y-auto max-h-48 scrollbar-thin">${itemsSummary}${order.notes ? `<div class="mt-2 text-xs text-red-300 bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fas fa-info-circle mr-1"></i>${order.notes}</div>` : ''}</div>
+                <div class="p-4 bg-slate-900 border-t border-slate-700">
+                    <div class="flex justify-between items-end mb-4"><span class="text-slate-400 text-sm">Total à payer</span><span class="text-3xl font-bold text-white">${order.total.toFixed(2)}€</span></div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="printTicket('${order.id}', '${order.table}', '${order.total}', this)" class="col-span-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg py-3 flex items-center justify-center transition-colors"><i class="fas fa-print"></i></button>
+                        <button onclick="markAsPaid('${order.id}', '${order.phone || ''}', ${order.total}, this)"
+                            class="col-span-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg py-3 shadow-lg shadow-blue-900/50 active:scale-95 transition-all flex items-center justify-center">
+                            <i class="fas fa-check mr-2"></i> ENCAISSÉ
+                        </button>
+                    </div>
+                </div>`;
+                list.appendChild(card);
+            });
+        }
+
+        // 🟢 替换整个 markAsPaid 函数
+        async function markAsPaid(orderId, phone, currentTotal, btn) {
+            // 1. 基础确认弹窗 (UI)
+            // 注意：这里我们暂时没法算出最终积分显示在弹窗里，
+            // 因为需要查库。为了流畅，弹窗里可以只提示"确认收款"。
+            const confirmed = await showModal('confirm', 'Encaissement', `Confirmer le paiement de <strong>${currentTotal.toFixed(2)}€</strong> ?`);
+            if (!confirmed) return;
+
+            const card = btn.closest('.bg-slate-800');
+            card.classList.add('fade-out');
+
+            try {
+                const { doc, updateDoc, increment, setDoc, getDoc, collection, query, where, getDocs } = window.Firestore;
+
+                let pointsToAdd = 0;
+
+                // ==========================================
+                // 🧠 核心算法：合并当天订单计算积分
+                // ==========================================
+                if (phone && phone !== "Non renseigné") {
+                    // A. 定义“今天凌晨”的时间
+                    const startOfDay = new Date();
+                    startOfDay.setHours(0, 0, 0, 0);
+
+                    // B. 查询该用户今天已支付的所有历史订单
+                    const q = query(
+                        collection(window.db, "Orders"),
+                        where("phone", "==", phone),
+                        where("status", "==", "paid"),
+                        where("paidAt", ">=", startOfDay) // 必须是今天的
+                    );
+
+                    const snapshot = await getDocs(q);
+
+                    let pastTotal = 0;   // 过去花的钱
+                    let pastPoints = 0;  // 过去拿到的分
+
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        pastTotal += (d.total || 0);
+                        // 注意：我们需要记录每个订单实际给了多少分，以便扣除
+                        // 建议在数据库Orders里多存一个字段 pointsAwarded
+                        pastPoints += (d.pointsAwarded || 0);
+                    });
+
+                    // C. 计算全天累计数据
+                    const grandTotal = pastTotal + currentTotal; // 今天总花费
+
+                    // D. 应用规则：满20欧，1:1积分，忽略小数
+                    // 如果总额不满20，应得0分；如果满20，应得 floor(总额) 分
+                    const targetTotalPoints = grandTotal < 20 ? 0 : Math.floor(grandTotal);
+
+                    // E. 计算本次应补发的差额
+                    // 例如：上午花了15(得0分)。现在花了10。总25(应得25分)。
+                    // 本次给 = 25 - 0 = 25分。
+                    pointsToAdd = targetTotalPoints - pastPoints;
+
+                    // 只有正数才给分 (防止退款等复杂情况导致负数)
+                    if (pointsToAdd < 0) pointsToAdd = 0;
+
+                    console.log(`总花:${grandTotal}, 应得:${targetTotalPoints}, 已给:${pastPoints}, 本次补:${pointsToAdd}`);
+
+                    // F. 给用户加分
+                    if (pointsToAdd > 0) {
+                        const userRef = doc(window.db, "Users", phone);
+                        const userSnap = await getDoc(userRef);
+                        if (userSnap.exists()) {
+                            await updateDoc(userRef, { points: increment(pointsToAdd) });
+                        } else {
+                            await setDoc(userRef, { points: pointsToAdd, lastOrder: new Date().toISOString() });
+                        }
+                    }
+                }
+
+                // 2. 更新当前订单状态 (标记为 paid，并记录本次发放了多少分)
+                await updateDoc(doc(window.db, "Orders", orderId), {
+                    status: "paid",
+                    paidAt: new Date(),
+                    pointsAwarded: pointsToAdd // 👈 关键：记录这单给了多少分，供下一次计算扣除用
+                });
+
+            } catch (e) {
+                console.error("Erreur encaissement:", e);
+                alert("Erreur réseau, veuillez vérifier votre connexion.");
+                card.classList.remove('fade-out');
+            }
+        }
+
+        function printTicket(id, table, total, btn) {
+            const cardBody = btn.closest('.bg-slate-800').querySelector('.space-y-1').innerHTML;
+            const time = new Date().toLocaleString('fr-FR');
+            const ticketHtml = `<div style="font-family: 'Courier New', monospace; width: 300px; font-size: 14px; text-align: center;"><h2 style="margin:0; font-size: 20px; font-weight:bold;">PHO BAMBOO</h2><p style="margin:5px 0 15px 0;">Puteaux - La Défense</p><div style="text-align:left; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;"><div>Table: <strong>${table}</strong></div><div style="font-size:12px;">${time}</div></div><div style="text-align:left; margin-bottom: 15px;">${cardBody.replace(/text-slate-300/g, 'color:black').replace(/text-sm/g, '')}</div><div style="border-top: 2px solid #000; padding-top: 10px; display:flex; justify-content:space-between; font-size: 18px; font-weight:bold;"><span>TOTAL</span><span>${parseFloat(total).toFixed(2)}€</span></div><p style="margin-top: 20px; font-size: 12px;">Merci et à bientôt !</p></div>`;
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = ticketHtml;
+            window.print();
+        }
+
+        // ================= 🔴 取消/废弃订单 =================
+        async function cancelOrder(orderId, btn) {
+            // 1. 安全确认：防止收银员手滑点错
+            const confirmed = await showModal('danger', 'Annuler la commande ?', "Cette action est irréversible.<br>La commande sera supprimée définitivement.");
+            if (!confirmed) return;
+
+            // 2. 界面动画：立刻让卡片缩写并消失
+            const card = btn.closest('.bg-slate-800');
+            card.classList.add('fade-out');
+
+            try {
+                // 3. 更新数据库：改为 'cancelled'
+                await window.Firestore.updateDoc(window.Firestore.doc(window.db, "Orders", orderId), {
+                    status: "cancelled",
+                    cancelledAt: new Date()
+                });
+            } catch (e) {
+                console.error("Erreur annulation:", e);
+                alert("Erreur réseau, veuillez réessayer.");
+                card.classList.remove('fade-out'); // 如果网络断了，把卡片恢复
+            }
+        }
+
+        // ================= 🔍 优化后的会员查询逻辑 =================
+        async function searchUser() {
+            const phone = document.getElementById('admin-phone').value;
+            if (!phone) {
+                showModal('error', 'Erreur', 'Veuillez entrer un numéro.');
+                return;
+            }
+
+            // 1. 初始状态：显示加载圈，隐藏操作按钮，分数显示 "..."
+            document.getElementById('user-loading').classList.remove('hidden');
+            document.getElementById('user-actions').classList.add('hidden'); // 先藏起来，防止误点
+            document.getElementById('current-points').textContent = "...";   // 👈 您要的显示效果
+
+            try {
+                const { doc, getDoc } = window.Firestore;
+                // 去数据库查询
+                const snap = await getDoc(doc(window.db, "Users", phone));
+
+                // 2. 核心判断：是否存在？
+                if (snap.exists()) {
+                    // ✅ 找到了：显示积分，展开操作区
+                    document.getElementById('current-points').textContent = snap.data().points || 0;
+                    document.getElementById('user-actions').classList.remove('hidden');
+                } else {
+                    // ❌ 没找到：显示横杠，弹窗报错
+                    document.getElementById('current-points').textContent = "---";
+                    // 这里直接调用我们刚才做的好看的新弹窗
+                    showModal('error', 'Client Inconnu', "Ce numéro n'a pas de compte fidélité.<br>Veuillez vérifier le numéro.");
+                }
+            } catch (e) { 
+                console.error(e);
+                showModal('error', 'Erreur Réseau', "Impossible de rechercher le client.");
+            } finally {
+                // 3. 无论结果如何，最后都要隐藏加载圈
+                document.getElementById('user-loading').classList.add('hidden');
+            }
+        }
+
+        async function changePoints(amt) {
+            const phone = document.getElementById('admin-phone').value;
+            document.getElementById('current-points').textContent = "...";
+            try {
+                const { doc, updateDoc, increment } = window.Firestore;
+                await updateDoc(doc(window.db, "Users", phone), { points: increment(amt) });
+                searchUser(); // 刷新
+            } catch (e) { showModal('error', 'Échec', "Impossible de modifier les points.<br>Vérifiez le numéro client."); }
+        }
+
+        function applyCustomPoints() {
+            const input = document.getElementById('custom-points-input');
+            const amt = parseInt(input.value);
+            if (isNaN(amt) || amt === 0) { showModal('error', 'Erreur', "Veuillez entrer un nombre valide.");
+                return; }
+            changePoints(amt); input.value = '';
+        }
+    </script>
+</body>
+
+</html>

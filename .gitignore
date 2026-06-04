@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+**/firebase-service-account.json
+**/firebase-key.json
+
+# Builds
+frontend/dist/
+backend/src/generated/
+
+# Runtime
+backend/uploads/
+*.log
+pm2.log
+
+# Editor / OS / tooling
+.claude/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

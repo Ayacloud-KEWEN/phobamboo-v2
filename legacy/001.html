@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUB CENTRAL</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #111827; color: white; } /* Gray-900 */
+        .hub-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hub-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="login-overlay" class="fixed inset-0 bg-gray-900 z-50 flex flex-col items-center justify-center">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-700 text-center w-80">
+            <div class="w-16 h-16 bg-green-900/50 rounded-full mx-auto mb-6 flex items-center justify-center border border-green-500/30">
+                <i class="fas fa-fingerprint text-3xl text-green-500"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide">ACCÈS SYSTÈME</h2>
+            <p class="text-gray-500 text-xs mb-6">Veuillez vous identifier</p>
+            
+            <div class="grid grid-cols-3 gap-3 mb-6 max-w-[200px] mx-auto">
+                <div id="pin-dots" class="col-span-3 flex justify-center space-x-3 mb-4 h-4">
+                    <div class="w-3 h-3 rounded-full bg-gray-700 dot transition-colors"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-700 dot transition-colors"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-700 dot transition-colors"></div>
+                    <div class="w-3 h-3 rounded-full bg-gray-700 dot transition-colors"></div>
+                </div>
+                <button onclick="enterPin(1)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">1</button>
+                <button onclick="enterPin(2)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">2</button>
+                <button onclick="enterPin(3)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">3</button>
+                <button onclick="enterPin(4)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">4</button>
+                <button onclick="enterPin(5)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">5</button>
+                <button onclick="enterPin(6)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">6</button>
+                <button onclick="enterPin(7)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">7</button>
+                <button onclick="enterPin(8)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">8</button>
+                <button onclick="enterPin(9)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">9</button>
+                <button onclick="clearPin()" class="bg-red-900/30 text-red-400 p-3 rounded-lg text-xs flex items-center justify-center hover:bg-red-900/50">CLR</button>
+                <button onclick="enterPin(0)" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg font-bold text-xl transition">0</button>
+                <button onclick="deletePin()" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center text-sm transition"><i class="fas fa-backspace"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content" class="w-full max-w-6xl hidden flex-col items-center">
+        
+        <div class="text-center mb-12 animate-fade-in-down">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">PHO BAMBOO</span>
+            </h1>
+            <p class="text-gray-400 uppercase tracking-[0.2em] text-sm">Gestion Centralisée</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-4">
+
+            <a href="counter.html" target="_blank" class="hub-card group bg-gradient-to-br from-blue-900/50 to-slate-900 border border-blue-800/50 p-8 rounded-2xl flex flex-col items-center text-center hover:border-blue-500 cursor-pointer">
+                <div class="w-20 h-20 bg-blue-900/30 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-cash-register text-4xl text-blue-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-blue-100 mb-2">Comptoir</h3>
+                <p class="text-gray-400 text-sm">Encaissement, impression tickets et gestion fidélité.</p>
+                <span class="mt-6 text-xs font-bold text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full bg-blue-900/20">STAFF</span>
+            </a>
+
+            <a href="kds.html" target="_blank" class="hub-card group bg-gradient-to-br from-orange-900/50 to-slate-900 border border-orange-800/50 p-8 rounded-2xl flex flex-col items-center text-center hover:border-orange-500 cursor-pointer">
+                <div class="w-20 h-20 bg-orange-900/30 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-fire-burner text-4xl text-orange-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-orange-100 mb-2">Cuisine</h3>
+                <p class="text-gray-400 text-sm">Écran de production. Affichage des commandes en direct.</p>
+                <span class="mt-6 text-xs font-bold text-orange-500 border border-orange-500/30 px-3 py-1 rounded-full bg-orange-900/20">CUISINE</span>
+            </a>
+
+            <a href="dashboard.html" target="_blank" class="hub-card group bg-gradient-to-br from-green-900/50 to-slate-900 border border-green-800/50 p-8 rounded-2xl flex flex-col items-center text-center hover:border-green-500 cursor-pointer">
+                <div class="w-20 h-20 bg-green-900/30 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chart-line text-4xl text-green-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-green-100 mb-2">Dashboard</h3>
+                <p class="text-gray-400 text-sm">Statistiques, chiffre d'affaires et base de données clients.</p>
+                <span class="mt-6 text-xs font-bold text-green-500 border border-green-500/30 px-3 py-1 rounded-full bg-green-900/20">PATRON</span>
+            </a>
+
+            <a href="menu.html" target="_blank" class="hub-card group bg-gradient-to-br from-purple-900/50 to-slate-900 border border-purple-800/50 p-8 rounded-2xl flex flex-col items-center text-center hover:border-purple-500 cursor-pointer">
+                <div class="w-20 h-20 bg-purple-900/30 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-edit text-4xl text-purple-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-purple-100 mb-2">Menu</h3>
+                <p class="text-gray-400 text-sm">Modifier la carte, les prix et les récompenses.</p>
+                <span class="mt-6 text-xs font-bold text-purple-500 border border-purple-500/30 px-3 py-1 rounded-full bg-purple-900/20">ADMIN</span>
+            </a>
+
+            <a href="index.html" target="_blank" class="hub-card group bg-gradient-to-br from-gray-800 to-slate-900 border border-gray-700 p-8 rounded-2xl flex flex-col items-center text-center hover:border-gray-500 cursor-pointer opacity-80 hover:opacity-100">
+                <div class="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-mobile-alt text-4xl text-gray-300"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-200 mb-2">Vue Client</h3>
+                <p class="text-gray-400 text-sm">Simuler une commande client (Page d'accueil).</p>
+                <span class="mt-6 text-xs font-bold text-gray-400 border border-gray-500/30 px-3 py-1 rounded-full bg-gray-800">PUBLIC</span>
+            </a>
+
+        </div>
+
+        <div class="mt-12 text-gray-600 text-sm">
+            &copy; 2026 Pho Bamboo System. All systems operational.
+        </div>
+    </div>
+
+    <script>
+        // ================= 简单的 PIN 逻辑 =================
+        const PIN = "1234";
+        let currentPin = "";
+
+        function enterPin(num) {
+            if (currentPin.length < 4) {
+                currentPin += num;
+                updatePinDots();
+            }
+            if (currentPin.length === 4) {
+                setTimeout(checkPin, 200);
+            }
+        }
+
+        function deletePin() {
+            currentPin = currentPin.slice(0, -1);
+            updatePinDots();
+        }
+
+        function clearPin() {
+            currentPin = "";
+            updatePinDots();
+        }
+
+        function updatePinDots() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index < currentPin.length) {
+                    dot.classList.remove('bg-gray-700');
+                    dot.classList.add('bg-green-500', 'shadow-[0_0_10px_rgba(34,197,94,0.5)]');
+                } else {
+                    dot.classList.add('bg-gray-700');
+                    dot.classList.remove('bg-green-500', 'shadow-[0_0_10px_rgba(34,197,94,0.5)]');
+                }
+            });
+        }
+
+        function checkPin() {
+            if (currentPin === PIN) {
+                // 登录成功
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('flex');
+            } else {
+                // 登录失败
+                // 注意：这里需要确保选择器和HTML中的ID一致
+                const box = document.querySelector('#login-overlay > div');
+                box.classList.add('shake');
+                setTimeout(() => box.classList.remove('shake'), 500);
+                clearPin();
+            }
+        }
+    </script>
+</body>
+</html>

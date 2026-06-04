@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Menu & Fidélité</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-active {
+            background-color: #16a34a;
+            color: white;
+        }
+
+        .tab-inactive {
+            background-color: white;
+            color: #4b5563;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <div id="login-overlay"
+        class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm">
+            <div
+                class="w-16 h-16 bg-gradient-to-br from-teal-500 to-green-500 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+                <i class="fas fa-utensils text-2xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-1 text-gray-800 text-center">Pho Bamboo</h2>
+            <p class="text-center text-sm text-gray-400 mb-8 font-medium">Espace Administrateur</p>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="email" id="login-email" required placeholder="manager@phobamboo.com"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-teal-500 outline-none transition-colors">
+                <input type="password" id="login-password" required placeholder="Mot de passe"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-teal-500 outline-none transition-colors">
+
+                <button type="submit" id="login-btn"
+                    class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
+                    SE CONNECTER
+                </button>
+
+                <div class="text-right mt-1">
+                    <button type="button" onclick="resetPassword()"
+                        class="text-xs font-medium text-gray-400 hover:text-teal-600 transition-colors">
+                        Mot de passe oublié ?
+                    </button>
+                </div>
+
+                <p id="login-error" class="text-red-500 text-xs text-center hidden">Identifiants incorrects.</p>
+            </form>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 hidden" id="app-content">
+
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold text-gray-800">Gestion Menu & Fidélité</h1>
+
+            <div class="flex bg-white rounded-lg shadow p-1">
+                <button onclick="switchTab('products')" id="tab-btn-products"
+                    class="tab-active px-6 py-2 rounded-md font-bold transition-all flex items-center">
+                    <i class="fas fa-utensils mr-2"></i> Carte
+                </button>
+                <button onclick="switchTab('rewards')" id="tab-btn-rewards"
+                    class="tab-inactive px-6 py-2 rounded-md font-bold transition-all flex items-center">
+                    <i class="fas fa-gift mr-2"></i> Fidélité
+                </button>
+            </div>
+        </div>
+
+        <div id="panel-products">
+            <div class="flex justify-end mb-4">
+                <button onclick="openProductModal()"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Nouveau Plat
+                </button>
+            </div>
+
+            <div class="flex overflow-x-auto pb-2 mb-4 gap-2 scrollbar-hide" id="category-filter-container">
+                <button onclick="filterAdminCategory('all')" id="filter-btn-all"
+                    class="filter-btn bg-gray-800 text-white px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-md transition-transform active:scale-95">
+                    Tout
+                </button>
+                <button onclick="filterAdminCategory('menus')" id="filter-btn-menus"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Plats spéciaux
+                </button>
+                <button onclick="filterAdminCategory('entrees')" id="filter-btn-entrees"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Entrées
+                </button>
+                <button onclick="filterAdminCategory('plats')" id="filter-btn-plats"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Plats
+                </button>
+                <button onclick="filterAdminCategory('boissons')" id="filter-btn-boissons"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Boissons
+                </button>
+                <button onclick="filterAdminCategory('alcool')" id="filter-btn-alcool"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Alcools
+                </button>
+                <button onclick="filterAdminCategory('desserts')" id="filter-btn-desserts"
+                    class="filter-btn bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap hover:bg-gray-50 transition-transform active:scale-95">
+                    Desserts
+                </button>
+            </div>
+
+            <div id="product-list" class="grid gap-4">
+                <div class="text-center py-10 text-gray-500">Chargement des plats...</div>
+            </div>
+        </div>
+
+        <div id="panel-rewards" class="hidden">
+            <div class="flex justify-end mb-4">
+                <button onclick="openRewardModal()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Nouvelle Récompense
+                </button>
+            </div>
+
+
+            <div id="reward-list" class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div class="text-center py-10 text-gray-500 col-span-full">Chargement des récompenses...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden z-40 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
+            <h2 class="text-xl font-bold mb-4" id="modal-title">Nouveau Plat</h2>
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i
+                    class="fas fa-times text-xl"></i></button>
+
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <input type="hidden" id="edit-id">
+
+                <div class="mb-4 text-center">
+                    <div class="w-full h-40 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group"
+                        onclick="document.getElementById('img-input').click()">
+                        <img id="preview-img" class="w-full h-full object-cover hidden">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-gray-600"
+                            id="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt text-3xl mb-1"></i><span class="text-xs">Changer
+                                l'image</span>
+                        </div>
+                        <div id="uploading-spinner"
+                            class="absolute inset-0 bg-white/80 flex items-center justify-center hidden"><i
+                                class="fas fa-spinner fa-spin text-2xl text-green-600"></i></div>
+                    </div>
+                    <input type="file" id="img-input" class="hidden" accept="image/*"
+                        onchange="handleImageSelect(this)">
+                    <input type="hidden" id="img-url">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div><label class="block text-xs font-bold text-gray-500 mb-1">Nom (FR)</label><input type="text"
+                            id="name-fr" required class="w-full border rounded p-2"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 mb-1">Nom (VN)</label><input type="text"
+                            id="name-vn" class="w-full border rounded p-2"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div><label class="block text-xs font-bold text-gray-500 mb-1">Prix (€)</label><input type="number"
+                            step="0.1" id="price" required class="w-full border rounded p-2"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Catégorie</label>
+                        <select id="category" class="w-full border rounded p-2">
+                            <option value="menus">Plats spéciaux</option>
+                            <option value="plats">Plats</option>
+                            <option value="entrees">Entrées</option>
+                            <option value="boissons">Boissons</option>
+                            <option value="alcool">Alcools</option>
+                            <option value="desserts">Desserts</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Sous-catégorie (Optionnel)</label>
+                        <input type="text" id="sub-category" placeholder="Ex: Bières, Vins, Vapeurs..."
+                            class="w-full border rounded p-2">
+                        <p class="text-[10px] text-gray-400 mt-1">Pour grouper les articles dans Boissons, Alcools,
+                            Menus.</p>
+                    </div>
+                </div>
+
+                <div id="combo-settings"
+                    class="col-span-2 hidden bg-green-50 p-4 rounded-lg border border-green-200 mt-2 mb-3">
+                    <label class="block text-xs font-bold text-green-700 mb-2"><i class="fas fa-link mr-1"></i> Entrées
+                        associées (+3.80€)</label>
+                    <p class="text-xs text-green-600 mb-2">Cochez les entrées proposées avec ce menu :</p>
+                    <div id="entree-checklist" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                    </div>
+                </div>
+                <div class="mb-3"><label class="block text-xs font-bold text-gray-500 mb-1">Description</label><textarea
+                        id="description" class="w-full border rounded p-2" rows="2"></textarea></div>
+                <div class="flex gap-4 mb-6 bg-gray-50 p-3 rounded">
+                    <label class="flex items-center text-sm font-bold text-green-700">
+                        <input type="checkbox" id="available" class="mr-2" checked> En ligne
+                    </label>
+                    <label class="flex items-center text-sm"><input type="checkbox" id="popular" class="mr-2">
+                        Populaire</label>
+                    <label class="flex items-center text-sm"><input type="checkbox" id="spicy" class="mr-2"> Épicé
+                        🌶️</label>
+                    <label class="flex items-center text-sm"><input type="checkbox" id="vegan" class="mr-2"> Végan
+                        🥬</label>
+                </div>
+                <button type="submit" id="save-btn"
+                    class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow hover:bg-green-700">Enregistrer</button>
+                <button type="button" id="delete-btn" onclick="deleteProduct()"
+                    class="w-full mt-3 text-red-500 text-sm hover:underline hidden">Supprimer</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="reward-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl relative">
+            <h2 class="text-xl font-bold mb-4" id="reward-modal-title">Récompense</h2>
+            <button onclick="closeRewardModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i
+                    class="fas fa-times text-xl"></i></button>
+
+            <form id="reward-form" onsubmit="saveReward(event)">
+                <input type="hidden" id="reward-id">
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Nom du cadeau</label>
+                    <input type="text" id="reward-name" placeholder="Ex: Boisson Offerte" required
+                        class="w-full border rounded p-3 text-lg font-bold">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Coût en Points</label>
+                    <div class="flex items-center">
+                        <input type="number" id="reward-cost" placeholder="200" required
+                            class="w-full border rounded p-3 text-lg font-mono text-green-600 font-bold">
+                        <span class="ml-2 text-gray-500 font-bold">pts</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-gray-500 mb-2">Style d'icône</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer border rounded-lg p-2 flex items-center hover:bg-gray-50">
+                            <input type="radio" name="reward-style" value="drink" class="mr-2" checked>
+                            <div
+                                class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mr-2">
+                                <i class="fas fa-glass-water"></i>
+                            </div>
+                            <span class="text-sm">Boisson</span>
+                        </label>
+                        <label class="cursor-pointer border rounded-lg p-2 flex items-center hover:bg-gray-50">
+                            <input type="radio" name="reward-style" value="food" class="mr-2">
+                            <div
+                                class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mr-2">
+                                <i class="fas fa-scroll"></i>
+                            </div>
+                            <span class="text-sm">Entrée</span>
+                        </label>
+                        <label class="cursor-pointer border rounded-lg p-2 flex items-center hover:bg-gray-50">
+                            <input type="radio" name="reward-style" value="dessert" class="mr-2">
+                            <div
+                                class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-2">
+                                <i class="fas fa-ice-cream"></i>
+                            </div>
+                            <span class="text-sm">Dessert</span>
+                        </label>
+                        <label class="cursor-pointer border rounded-lg p-2 flex items-center hover:bg-gray-50">
+                            <input type="radio" name="reward-style" value="meal" class="mr-2">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-100 text-green-500 flex items-center justify-center mr-2">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <span class="text-sm">Plat</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="reward-save-btn"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-700">Enregistrer</button>
+                <button type="button" id="reward-delete-btn" onclick="deleteReward()"
+                    class="w-full mt-3 text-red-500 text-sm hover:underline hidden">Supprimer cette récompense</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="./firebase-config.js"></script>
+
+    <script>
+
+        let allProducts = [];
+        let allRewards = []; // 存储奖励数据
+
+        // ================= 🔒 真实身份验证 (Firebase Auth) =================
+        function initAuth() {
+            if (!window.auth) { setTimeout(initAuth, 500); return; }
+
+            // 监听登录状态：如果员工昨天登录过，今天打开页面直接进，不用再输密码！
+            window.Auth.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    console.log("Connecté en tant que:", user.email);
+                    document.getElementById('login-overlay').classList.add('hidden');
+
+                    // 🔴 关键修复：这里的 ID 是 app-content，不是 main-content
+                    document.getElementById('app-content').classList.remove('hidden');
+
+                    // 🔴 这里也不需要加 'flex'，因为在 HTML 里它本来就不是 flex 布局
+                    // document.getElementById('app-content').classList.add('flex'); // 这行删掉
+
+                    // 加载菜单和奖励数据
+                    loadProducts();
+                    loadRewards();
+                } else {
+                    document.getElementById('login-overlay').classList.remove('hidden');
+                }
+            });
+        }
+
+        // 提交登录表单
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; err.classList.add('hidden');
+
+            try {
+                // 核心：请求 Firebase 云端验证密码
+                await window.Auth.signInWithEmailAndPassword(window.auth, email, pass);
+                // 成功后，onAuthStateChanged 会自动触发，关闭弹窗并加载数据
+            } catch (error) {
+                err.classList.remove('hidden');
+                err.textContent = "Erreur: Email ou mot de passe incorrect.";
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'SE CONNECTER';
+            }
+        }
+
+        // ================= 📧 发送重置密码邮件 =================
+        async function resetPassword() {
+            // 获取当前输入的邮箱
+            const email = document.getElementById('login-email').value;
+
+            // 拦截：如果没有输入邮箱，提示先输入
+            if (!email) {
+                alert("Veuillez d'abord entrer votre adresse email dans le champ ci-dessus.");
+                return;
+            }
+
+            try {
+                // 调用 Firebase 发送重置邮件
+                await window.Auth.sendPasswordResetEmail(window.auth, email);
+                alert("✅ Un email de réinitialisation a été envoyé à : " + email + "\nVeuillez vérifier votre boîte de réception (et vos Spams).");
+            } catch (error) {
+                console.error("Erreur reset:", error);
+                alert("Erreur: Adresse email introuvable ou invalide.");
+            }
+        }
+
+        // 页面加载时启动验证监控
+        document.addEventListener('DOMContentLoaded', initAuth);
+
+        function switchTab(tab) {
+            const pProds = document.getElementById('panel-products');
+            const pRewards = document.getElementById('panel-rewards');
+            const bProds = document.getElementById('tab-btn-products');
+            const bRewards = document.getElementById('tab-btn-rewards');
+
+            if (tab === 'products') {
+                pProds.classList.remove('hidden'); pRewards.classList.add('hidden');
+                bProds.className = "tab-active px-6 py-2 rounded-md font-bold transition-all flex items-center";
+                bRewards.className = "tab-inactive px-6 py-2 rounded-md font-bold transition-all flex items-center";
+            } else {
+                pProds.classList.add('hidden'); pRewards.classList.remove('hidden');
+                bProds.className = "tab-inactive px-6 py-2 rounded-md font-bold transition-all flex items-center";
+                bRewards.className = "tab-active px-6 py-2 rounded-md font-bold transition-all flex items-center";
+                loadRewards(); // 切换时刷新一下
+            }
+        }
+
+        // ================== 1. 菜品逻辑 (Products) ==================
+        // ================= 全局变量 =================
+        let cachedGroupedProducts = {}; // 用于在内存中缓存分类好的数据
+        let currentAdminFilter = 'all'; // 当前选中的分类，默认为全部
+
+        // ================= 1. 下载并处理数据 =================
+        async function loadProducts() {
+            if (!window.db) { setTimeout(loadProducts, 500); return; }
+
+            // 显示加载状态
+            document.getElementById('product-list').innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Chargement...</div>';
+
+            const q = window.Firestore.query(window.Firestore.collection(window.db, "Products"));
+            const snapshot = await window.Firestore.getDocs(q);
+
+            allProducts = [];
+
+            // 初始化容器
+            cachedGroupedProducts = {
+                'menus': [], 'entrees': [], 'plats': [], 'boissons': [], 'alcool': [], 'desserts': []
+            };
+
+            // 分类整理
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                d.id = doc.id;
+                allProducts.push(d);
+
+                const cat = d.category || 'plats';
+                if (cachedGroupedProducts[cat]) {
+                    cachedGroupedProducts[cat].push(d);
+                }
+            });
+
+            // 排序 (A-Z)
+            for (let cat in cachedGroupedProducts) {
+                cachedGroupedProducts[cat].sort((a, b) => a.name_fr.localeCompare(b.name_fr));
+            }
+
+            // 数据准备好了，开始渲染
+            renderAdminProductList();
+        }
+
+        // ================= 2. 切换分类点击事件 =================
+        function filterAdminCategory(category) {
+            currentAdminFilter = category;
+
+            // 1. 更新按钮样式 (高亮当前选中的)
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                // 移除高亮
+                btn.classList.remove('bg-gray-800', 'text-white', 'shadow-md');
+                // 添加普通样式
+                btn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
+            });
+
+            // 给当前点击的按钮添加高亮
+            const activeBtn = document.getElementById('filter-btn-' + category);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-gray-600', 'border', 'border-gray-200');
+                activeBtn.classList.add('bg-gray-800', 'text-white', 'shadow-md');
+            }
+
+            // 2. 重新渲染列表
+            renderAdminProductList();
+        }
+
+        // ================= 3. 渲染列表到屏幕 =================
+        function renderAdminProductList() {
+            const listEl = document.getElementById('product-list');
+            listEl.innerHTML = "";
+
+            const catTitles = {
+                'menus': 'Plats spéciaux', 'entrees': 'Entrées', 'plats': 'Plats',
+                'boissons': 'Boissons', 'alcool': 'Alcools', 'desserts': 'Desserts'
+            };
+
+            // 定义要遍历的分类列表
+            let categoriesToShow = [];
+            if (currentAdminFilter === 'all') {
+                categoriesToShow = ['menus', 'entrees', 'plats', 'boissons', 'alcool', 'desserts'];
+            } else {
+                categoriesToShow = [currentAdminFilter];
+            }
+
+            let hasItems = false;
+
+            categoriesToShow.forEach(cat => {
+                const products = cachedGroupedProducts[cat];
+
+                // 只有当该分类有产品，或者当前是单分类筛选模式时，才显示
+                if (products && products.length > 0) {
+                    hasItems = true;
+
+                    // 🌟 渲染分类标题栏
+                    const header = document.createElement('div');
+                    header.className = "col-span-full mt-2 mb-2"; // 稍微调整了边距
+                    header.innerHTML = `<h2 class="text-lg font-bold text-gray-700 border-l-4 border-green-600 pl-3 uppercase tracking-wider">${catTitles[cat]} <span class="text-sm text-gray-400 ml-2 font-normal">(${products.length})</span></h2>`;
+                    listEl.appendChild(header);
+
+                    // 🌟 渲染该分类下的菜品
+                    products.forEach(d => {
+                        const div = document.createElement('div');
+                        div.className = `bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md mb-2`; // 增加了 mb-2 间距
+                        div.innerHTML = `
+                    <div class="flex items-center space-x-4 overflow-hidden">
+                        <img src="${d.image || './NA.png'}" class="w-14 h-14 rounded-lg object-cover bg-gray-100 flex-shrink-0">
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-gray-800 truncate ${d.available ? '' : 'text-gray-400 line-through'}">${d.name_fr}</h3>
+                            <p class="text-sm font-bold text-green-700">${d.price}€</p>
+                            ${d.sub_category ? `<p class="text-xs text-gray-400 bg-gray-100 inline-block px-1 rounded">${d.sub_category}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0">
+                        <button onclick="toggleAvailability('${d.id}', ${d.available})" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${d.available ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-400 border-gray-200'} active:scale-95 transition">
+                            ${d.available ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>'}
+                        </button>
+                        <button onclick="editProduct('${d.id}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center hover:bg-blue-100 active:scale-95 transition">
+                            <i class="fas fa-pen text-xs"></i>
+                        </button>
+                    </div>`;
+                        listEl.appendChild(div);
+                    });
+                }
+            });
+
+            if (!hasItems) {
+                listEl.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">Aucun produit dans cette catégorie.</div>`;
+            }
+        }
+
+        async function handleImageSelect(input) {
+            const file = input.files[0]; if (!file) return;
+            document.getElementById('uploading-spinner').classList.remove('hidden'); document.getElementById('save-btn').disabled = true;
+            try {
+                const compressedBlob = await compressImage(file, 800, 0.7);
+                const fileName = `menu_${Date.now()}.webp`;
+                const storageRef = window.Storage.ref(window.storage, 'menu_images/' + fileName);
+                await window.Storage.uploadBytes(storageRef, compressedBlob);
+                const url = await window.Storage.getDownloadURL(storageRef);
+                document.getElementById('img-url').value = url; document.getElementById('preview-img').src = url;
+                document.getElementById('preview-img').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden');
+            } catch (err) { alert("Erreur upload"); } finally { document.getElementById('uploading-spinner').classList.add('hidden'); document.getElementById('save-btn').disabled = false; }
+        }
+        function compressImage(file, maxWidth, quality) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); canvas.toBlob((blob) => { resolve(blob); }, 'image/webp', quality); }; }; reader.onerror = error => reject(error); }); }
+
+        // 升级后的保存函数，增加了对 combo_options 的保存
+        async function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+
+            // 收集所有被勾选的前菜 ID
+            const selectedEntrees = Array.from(document.querySelectorAll('input[name="combo-entree"]:checked')).map(cb => cb.value);
+
+            const data = {
+                name_fr: document.getElementById('name-fr').value,
+                name_vn: document.getElementById('name-vn').value,
+                price: parseFloat(document.getElementById('price').value),
+                category: document.getElementById('category').value,
+                sub_category: document.getElementById('sub-category').value.trim(),
+                description: document.getElementById('description').value,
+                image: document.getElementById('img-url').value,
+                popular: document.getElementById('popular').checked,
+                spicy: document.getElementById('spicy').checked,
+                vegan: document.getElementById('vegan').checked,
+                available: document.getElementById('available').checked,
+                // 新增这一行：保存套餐配置
+                combo_options: document.getElementById('category').value === 'menus' ? selectedEntrees : []
+            };
+            try {
+                if (id) await window.Firestore.updateDoc(window.Firestore.doc(window.db, "Products", id), data);
+                else await window.Firestore.addDoc(window.Firestore.collection(window.db, "Products"), data);
+                closeProductModal(); loadProducts();
+            } catch (err) { alert("Erreur"); }
+        }
+        async function toggleAvailability(id, stat) { await window.Firestore.updateDoc(window.Firestore.doc(window.db, "Products", id), { available: !stat }); loadProducts(); }
+        async function deleteProduct() { if (confirm("Supprimer ?")) { await window.Firestore.deleteDoc(window.Firestore.doc(window.db, "Products", document.getElementById('edit-id').value)); closeProductModal(); loadProducts(); } }
+
+        function openProductModal() {
+            document.getElementById('product-form').reset(); // 重置可见表单
+            document.getElementById('sub-category').value = "";
+
+            // 强制清空隐藏的图片 URL
+            document.getElementById('img-url').value = "";
+
+            document.getElementById('available').checked = true;
+            document.getElementById('edit-id').value = "";
+            document.getElementById('modal-title').textContent = "Nouveau Plat";
+            document.getElementById('delete-btn').classList.add('hidden');
+
+            // 隐藏预览图，显示上传图标
+            document.getElementById('preview-img').classList.add('hidden');
+            document.getElementById('preview-img').src = "";
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+
+            // 🔴 关键修复：因为表单重置后，默认分类就是 'menus'
+            // 所以这里直接显示前菜配置框，并渲染列表
+            document.getElementById('combo-settings').classList.remove('hidden');
+            updateSubSelect();
+        }
+        function editProduct(id) {
+    const d = allProducts.find(p => p.id === id);
+    if (!d) return;
+
+    // 1. 基础信息回显
+    document.getElementById('edit-id').value = id;
+    document.getElementById('modal-title').textContent = "Modifier Plat";
+    document.getElementById('delete-btn').classList.remove('hidden');
+    document.getElementById('name-fr').value = d.name_fr;
+    document.getElementById('name-vn').value = d.name_vn || "";
+    document.getElementById('price').value = d.price;
+    
+    // 强制修正分类下拉框 (防止 Menus vs menus 不匹配)
+    const catSelect = document.getElementById('category');
+    catSelect.value = (d.category || 'plats').toLowerCase(); 
+    // 如果下拉框里没有这个值（比如旧数据是 Menu），默认选回 menus
+    if (!catSelect.value) catSelect.value = 'menus';
+
+    document.getElementById('description').value = d.description || "";
+    document.getElementById('popular').checked = d.popular;
+    document.getElementById('spicy').checked = d.spicy;
+    document.getElementById('vegan').checked = d.vegan;
+    document.getElementById('available').checked = d.available;
+    document.getElementById('img-url').value = d.image || "";
+    document.getElementById('sub-category').value = d.sub_category || "";
+
+    // 图片回显
+    if (d.image) {
+        document.getElementById('preview-img').src = d.image;
+        document.getElementById('preview-img').classList.remove('hidden');
+        document.getElementById('upload-placeholder').classList.add('hidden');
+    } else {
+        document.getElementById('preview-img').classList.add('hidden');
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+    }
+
+    // 2. 🟢 修复：前菜关联逻辑
+    // 只要下拉框现在选的是 menus，或者数据里已有 combo_options，就显示设置框
+    const isMenu = catSelect.value === 'menus' || (d.combo_options && d.combo_options.length > 0);
+    
+    document.getElementById('combo-settings').classList.toggle('hidden', !isMenu);
+    
+    if (isMenu) {
+        // 先生成勾选框
+        updateSubSelect(); 
+        
+        const savedEntrees = d.combo_options || [];
+        console.log("已保存的前菜关联:", savedEntrees);
+
+        // 延迟一点点确保 DOM 渲染，然后打勾
+        setTimeout(() => {
+            document.querySelectorAll('input[name="combo-entree"]').forEach(cb => {
+                // 转换成字符串对比，确保 ID 类型一致
+                cb.checked = savedEntrees.some(s => String(s) === String(cb.value));
+            });
+        }, 0);
+    }
+
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+        function closeProductModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+
+        // ================== 2. 奖励逻辑 (Rewards - New) ==================
+        async function loadRewards() {
+            if (!window.db) return;
+            // 按 cost 排序
+            const q = window.Firestore.query(window.Firestore.collection(window.db, "Rewards"), window.Firestore.orderBy("cost"));
+            const snapshot = await window.Firestore.getDocs(q);
+            allRewards = [];
+            const listEl = document.getElementById('reward-list');
+            listEl.innerHTML = "";
+            snapshot.forEach(doc => {
+                const r = doc.data(); r.id = doc.id; allRewards.push(r);
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full ${r.bg || 'bg-gray-100'} ${r.color || 'text-gray-500'} flex items-center justify-center text-xl">
+                            <i class="fas ${r.icon || 'fa-gift'}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-800">${r.name}</h3>
+                            <p class="text-sm font-bold text-green-600">${r.cost} pts</p>
+                        </div>
+                    </div>
+                    <button onclick="editReward('${r.id}')" class="p-2 text-gray-400 hover:text-blue-600"><i class="fas fa-pen"></i></button>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        async function saveReward(e) {
+            e.preventDefault();
+            const id = document.getElementById('reward-id').value;
+
+            // 获取样式预设
+            const style = document.querySelector('input[name="reward-style"]:checked').value;
+            let icon = "fa-gift", color = "text-gray-500", bg = "bg-gray-100";
+
+            if (style === 'drink') { icon = "fa-glass-water"; color = "text-blue-500"; bg = "bg-blue-100"; }
+            else if (style === 'food') { icon = "fa-scroll"; color = "text-orange-500"; bg = "bg-orange-100"; }
+            else if (style === 'dessert') { icon = "fa-ice-cream"; color = "text-pink-500"; bg = "bg-pink-100"; }
+            else if (style === 'meal') { icon = "fa-utensils"; color = "text-green-500"; bg = "bg-green-100"; }
+
+            const data = {
+                name: document.getElementById('reward-name').value,
+                cost: parseInt(document.getElementById('reward-cost').value),
+                icon: icon, color: color, bg: bg
+            };
+
+            const btn = document.getElementById('reward-save-btn');
+            btn.disabled = true;
+            try {
+                if (id) await window.Firestore.updateDoc(window.Firestore.doc(window.db, "Rewards", id), data);
+                else await window.Firestore.addDoc(window.Firestore.collection(window.db, "Rewards"), data);
+                closeRewardModal(); loadRewards();
+            } catch (err) { alert("Erreur: " + err.message); }
+            finally { btn.disabled = false; }
+        }
+
+        async function deleteReward() {
+            const id = document.getElementById('reward-id').value;
+            if (confirm("Supprimer cette récompense ?")) {
+                await window.Firestore.deleteDoc(window.Firestore.doc(window.db, "Rewards", id));
+                closeRewardModal(); loadRewards();
+            }
+        }
+
+        function openRewardModal() {
+            document.getElementById('reward-form').reset();
+            document.getElementById('reward-id').value = "";
+            document.getElementById('reward-modal-title').textContent = "Nouvelle Récompense";
+            document.getElementById('reward-delete-btn').classList.add('hidden');
+            document.getElementById('reward-modal').classList.remove('hidden');
+        }
+
+        function editReward(id) {
+            const r = allRewards.find(i => i.id === id);
+            if (!r) return;
+            document.getElementById('reward-id').value = id;
+            document.getElementById('reward-name').value = r.name;
+            document.getElementById('reward-cost').value = r.cost;
+            document.getElementById('reward-modal-title').textContent = "Modifier Récompense";
+            document.getElementById('reward-delete-btn').classList.remove('hidden');
+
+            // 简单的样式回显 (根据 icon 判断)
+            let styleVal = 'food';
+            if (r.icon.includes('glass')) styleVal = 'drink';
+            else if (r.icon.includes('ice')) styleVal = 'dessert';
+            else if (r.icon.includes('utensils')) styleVal = 'meal';
+            const radio = document.querySelector(`input[name="reward-style"][value="${styleVal}"]`);
+            if (radio) radio.checked = true;
+
+            document.getElementById('reward-modal').classList.remove('hidden');
+        }
+
+        function closeRewardModal() { document.getElementById('reward-modal').classList.add('hidden'); }
+
+        // 监控分类下拉框：如果选了 "menus"，就显示套餐配置区
+        document.getElementById('category').addEventListener('change', function () {
+            const isMenu = this.value === 'menus';
+            document.getElementById('combo-settings').classList.toggle('hidden', !isMenu);
+            if (isMenu) updateSubSelect();
+        });
+
+        // 自动把所有 "entrees" 分类的菜品变成勾选框
+        function updateSubSelect() {
+    // 1. 找到所有分类为 entrees 的菜 (忽略大小写，防止 Entrees vs entrees)
+    const entrees = allProducts.filter(p => (p.category || '').toLowerCase() === 'entrees');
+    const container = document.getElementById('entree-checklist');
+    
+    // 2. 使用数组 map 一次性生成 HTML，性能更好
+    if (entrees.length === 0) {
+        container.innerHTML = '<p class="col-span-full text-xs text-red-500">Aucune entrée trouvée (vérifiez la catégorie "Entrées").</p>';
+        return;
+    }
+
+    const html = entrees.map(e => `
+        <label class="flex items-center text-sm bg-white p-2 rounded border border-green-100 cursor-pointer hover:bg-green-100 transition">
+            <input type="checkbox" name="combo-entree" value="${e.id}" class="mr-2 text-green-600 focus:ring-green-500">
+            <span class="truncate">${e.name_fr}</span>
+        </label>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+    </script>
+</body>
+
+</html>
