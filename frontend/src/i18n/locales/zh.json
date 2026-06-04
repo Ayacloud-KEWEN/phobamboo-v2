@@ -1,5 +1,10 @@
 {
-  "nav": { "menu": "菜单", "infos": "信息", "reserve": "预订", "pdf": "PDF菜单" },
+  "nav": {
+    "menu": "菜单",
+    "infos": "信息",
+    "reserve": "预订",
+    "pdf": "PDF菜单"
+  },
   "menu": {
     "title": "我们的菜单",
     "subtitle": "品尝正宗越南与泰国风味，新鲜食材，自家烹制。",
@@ -15,32 +20,90 @@
     "alcool": "酒水",
     "desserts": "甜点"
   },
-  "tags": { "popular": "热门", "spicy": "辣", "vegan": "素食" },
+  "tags": {
+    "popular": "热门",
+    "spicy": "辣",
+    "vegan": "素"
+  },
   "order": {
+    "welcome": "欢迎光临",
+    "specialties": "越南 & 泰国风味",
+    "myPoints": "我的积分",
     "table": "桌号",
     "takeaway": "外带",
     "add": "加入",
+    "points": "分",
     "cart": "购物车",
+    "yourOrder": "您的订单",
+    "articles": "件商品",
     "empty": "购物车是空的",
     "total": "合计",
-    "notes": "备注（过敏等）",
-    "send": "提交订单",
+    "minForPoints": "(满20€才有积分)",
+    "specialInstructions": "特殊要求",
+    "suggestions": "建议",
+    "instructionsPlaceholder": "例如：不要香菜、多辣、过敏...",
+    "send": "下单并发送",
     "sending": "提交中...",
-    "sent": "订单已提交！",
-    "quantity": "数量"
+    "sent": "订单已发送！",
+    "payNote": "用餐后柜台付款",
+    "cgv": "下单即表示接受我们的条款。积分将自动计算。",
+    "gift": "赠品",
+    "noPointsTitle": "不要积分？",
+    "noPointsMsg": "不登录继续（不累计积分）？"
+  },
+  "combo": {
+    "question": "要不要配一份前菜？",
+    "justDish": "只要主菜（无前菜）",
+    "formule": "前菜套餐 (+3.80€)",
+    "addToCart": "加入购物车"
   },
   "loyalty": {
-    "title": "会员积分",
+    "title": "Pho Bamboo 会员",
+    "subtitle": "吃饭、积分、享优惠！",
     "points": "积分",
-    "login": "会员登录",
-    "phone": "手机号码",
-    "loginBtn": "登录",
-    "guest": "以游客身份继续",
-    "smsConsent": "我同意接收短信优惠信息",
-    "yourPoints": "您的积分",
+    "available": "可用积分",
+    "nextReward": "下一个奖励",
+    "maxLevel": "已达最高！",
+    "howToEarn": "如何获得积分？",
+    "rule1": "1 € = 1 积分",
+    "rule2": "当天累计满 20 € 才开始计分。",
+    "rule3": "（午餐 + 晚餐可累加！）",
+    "rule4": "积分按总额向下取整计算。",
     "rewards": "奖励兑换",
-    "redeem": "兑换",
-    "notEnough": "积分不足"
+    "obtain": "兑换",
+    "locked": "未解锁",
+    "change": "切换",
+    "redeemConfirm": "用 {cost} 积分兑换：{name}？",
+    "redeemTitle": "使用积分？",
+    "redeemed": "积分将在确认订单时扣除。",
+    "notEnough": "积分不足",
+    "notEnoughMsg": "您的积分不够。",
+    "tab": "会员"
   },
-  "common": { "close": "关闭", "confirm": "确认", "cancel": "取消", "back": "返回" }
+  "login": {
+    "title": "Pho Bamboo 会员",
+    "message": "输入手机号，每次点餐累计积分：",
+    "placeholder": "例如：0612345678",
+    "consentTerms": "我接受用户条款和隐私政策。",
+    "account": "会员账户",
+    "offers": "优惠 & 促销",
+    "offersDesc": "我同意通过短信接收优惠和资讯。",
+    "submit": "登录",
+    "guest": "不登录继续",
+    "invalid": "号码无效",
+    "invalidMsg": "需要 10 位数字（如 06...）"
+  },
+  "infos": {
+    "findUs": "找到我们",
+    "hours": "营业时间",
+    "contact": "联系方式",
+    "scanToOrder": "点餐请扫描餐桌上的二维码。",
+    "reserveNote": "建议午餐时段预订。"
+  },
+  "common": {
+    "close": "关闭",
+    "confirm": "确认",
+    "cancel": "取消",
+    "back": "返回"
+  }
 }

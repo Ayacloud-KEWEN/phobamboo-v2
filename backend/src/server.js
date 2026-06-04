@@ -29,14 +29,30 @@ app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/rewards', rewardRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/members', memberRoutes);
-app.use('/api/config', configRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/stats', statsRoutes);
+
+// Wrap async route handlers so rejected promises hit the error middleware
+// instead of crashing the process. Applied to every router below.
+const wrapAsync = (router) => {
+  for (const layer of router.stack || []) {
+    const route = layer.route;
+    if (!route) continue;
+    route.stack.forEach((s) => {
+      const fn = s.handle;
+      if (fn.length < 4) {
+        s.handle = (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+      }
+    });
+  }
+  return router;
+};
+app.use('/api/auth', wrapAsync(authRoutes));
+app.use('/api/products', wrapAsync(productRoutes));
+app.use('/api/rewards', wrapAsync(rewardRoutes));
+app.use('/api/orders', wrapAsync(orderRoutes));
+app.use('/api/members', wrapAsync(memberRoutes));
+app.use('/api/config', wrapAsync(configRoutes));
+app.use('/api/upload', wrapAsync(uploadRoutes));
+app.use('/api/stats', wrapAsync(statsRoutes));
 
 // --- Serve the built frontend (single-port deploy) ---
 // Set FRONTEND_DIR to the Vite build output. When present, the backend serves
@@ -55,6 +71,18 @@ if (fs.existsSync(path.join(FRONTEND_DIR, 'index.html'))) {
   });
   console.log(`🖥️  Serving frontend from ${FRONTEND_DIR}`);
 }
+
+// Central error handler — returns JSON 500 instead of crashing.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('API error:', err?.message || err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Server error' });
+});
+
+// Last-resort safety net so a stray rejection never kills the process.
+process.on('unhandledRejection', (e) => console.error('UnhandledRejection:', e));
+process.on('uncaughtException', (e) => console.error('UncaughtException:', e));
 
 // --- HTTP + WebSocket ---
 const server = http.createServer(app);

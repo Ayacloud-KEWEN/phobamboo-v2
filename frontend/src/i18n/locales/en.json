@@ -1,5 +1,10 @@
 {
-  "nav": { "menu": "Our Menu", "infos": "Info", "reserve": "Book", "pdf": "PDF Menu" },
+  "nav": {
+    "menu": "Our Menu",
+    "infos": "Info",
+    "reserve": "Book",
+    "pdf": "PDF Menu"
+  },
   "menu": {
     "title": "Our Menu",
     "subtitle": "Discover authentic Vietnamese and Thai flavors, homemade with fresh ingredients.",
@@ -15,32 +20,90 @@
     "alcool": "Alcohol",
     "desserts": "Desserts"
   },
-  "tags": { "popular": "Popular", "spicy": "Spicy", "vegan": "Vegan" },
+  "tags": {
+    "popular": "POP",
+    "spicy": "HOT",
+    "vegan": "VEG"
+  },
   "order": {
+    "welcome": "Welcome",
+    "specialties": "VIET & THAI specialties",
+    "myPoints": "My Points",
     "table": "Table",
     "takeaway": "Takeaway",
     "add": "Add",
-    "cart": "Cart",
-    "empty": "Your cart is empty",
+    "points": "pts",
+    "cart": "My Cart",
+    "yourOrder": "Your Order",
+    "articles": "item | items",
+    "empty": "Cart is empty",
     "total": "Total",
-    "notes": "Notes (allergies, etc.)",
-    "send": "Send order",
+    "minForPoints": "(Min. €20 to earn points)",
+    "specialInstructions": "Special instructions",
+    "suggestions": "Suggestions",
+    "instructionsPlaceholder": "e.g. No coriander, extra chili, allergies...",
+    "send": "Place & Send Order",
     "sending": "Sending...",
     "sent": "Order sent!",
-    "quantity": "Quantity"
+    "payNote": "Pay at the counter after your meal",
+    "cgv": "By ordering, you accept our terms. Loyalty points are calculated automatically.",
+    "gift": "GIFT",
+    "noPointsTitle": "No points?",
+    "noPointsMsg": "Continue without earning points?"
+  },
+  "combo": {
+    "question": "Want a starter with your dish?",
+    "justDish": "Just the dish (No starter)",
+    "formule": "Starter Formula (+€3.80)",
+    "addToCart": "Add to cart"
   },
   "loyalty": {
-    "title": "Loyalty",
-    "points": "Points",
-    "login": "Member login",
-    "phone": "Phone number",
-    "loginBtn": "Log in",
-    "guest": "Continue as guest",
-    "smsConsent": "I agree to receive offers by SMS",
-    "yourPoints": "Your points",
+    "title": "Pho Bamboo Loyalty",
+    "subtitle": "Eat, earn, enjoy!",
+    "points": "points",
+    "available": "points available",
+    "nextReward": "Next reward",
+    "maxLevel": "MAX level!",
+    "howToEarn": "How to earn points?",
+    "rule1": "€1 = 1 Point",
+    "rule2": "Points unlock once you reach €20 in the same day.",
+    "rule3": "(Your lunch + dinner orders add up!)",
+    "rule4": "Points based on the total rounded down.",
     "rewards": "Rewards",
-    "redeem": "Redeem",
-    "notEnough": "Not enough points"
+    "obtain": "Redeem",
+    "locked": "Locked",
+    "change": "Change",
+    "redeemConfirm": "Spend {cost} pts for: {name}?",
+    "redeemTitle": "Use your points?",
+    "redeemed": "Points will be deducted when you confirm the order.",
+    "notEnough": "Insufficient balance",
+    "notEnoughMsg": "You don't have enough points.",
+    "tab": "Loyalty"
   },
-  "common": { "close": "Close", "confirm": "Confirm", "cancel": "Cancel", "back": "Back" }
+  "login": {
+    "title": "Pho Bamboo Loyalty",
+    "message": "Enter your phone number to earn points on every order:",
+    "placeholder": "e.g. 0612345678",
+    "consentTerms": "I accept the Terms and Privacy Policy.",
+    "account": "Loyalty Account",
+    "offers": "Offers & Promos",
+    "offersDesc": "I agree to receive discounts and news by SMS.",
+    "submit": "Log in",
+    "guest": "Continue as guest",
+    "invalid": "Invalid number",
+    "invalidMsg": "10 digits required (e.g. 06...)"
+  },
+  "infos": {
+    "findUs": "Find us",
+    "hours": "Hours",
+    "contact": "Contact",
+    "scanToOrder": "To order, scan the QR code on your table.",
+    "reserveNote": "Reservation recommended at lunch."
+  },
+  "common": {
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "back": "Back"
+  }
 }

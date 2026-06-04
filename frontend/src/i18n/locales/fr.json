@@ -1,5 +1,10 @@
 {
-  "nav": { "menu": "Notre Carte", "infos": "Infos", "reserve": "Réserver", "pdf": "Menu PDF" },
+  "nav": {
+    "menu": "Notre Carte",
+    "infos": "Infos",
+    "reserve": "Réserver",
+    "pdf": "Menu PDF"
+  },
   "menu": {
     "title": "Notre Carte",
     "subtitle": "Découvrez les saveurs authentiques du Vietnam et de la Thaïlande, cuisinées maison avec des produits frais.",
@@ -15,32 +20,90 @@
     "alcool": "Alcools",
     "desserts": "Desserts"
   },
-  "tags": { "popular": "Populaire", "spicy": "Épicé", "vegan": "Végan" },
+  "tags": {
+    "popular": "POP",
+    "spicy": "HOT",
+    "vegan": "VÉGÉ"
+  },
   "order": {
+    "welcome": "Bienvenue",
+    "specialties": "Spécialités VIET & THAÏ",
+    "myPoints": "Mes Points",
     "table": "Table",
     "takeaway": "À emporter",
     "add": "Ajouter",
-    "cart": "Panier",
-    "empty": "Votre panier est vide",
+    "points": "pts",
+    "cart": "Mon Panier",
+    "yourOrder": "Votre Commande",
+    "articles": "article | articles",
+    "empty": "Panier vide",
     "total": "Total",
-    "notes": "Remarques (allergies, etc.)",
-    "send": "Envoyer la commande",
-    "sending": "Envoi...",
+    "minForPoints": "(Min. 20€ pour points)",
+    "specialInstructions": "Instructions spéciales",
+    "suggestions": "Suggestions",
+    "instructionsPlaceholder": "Ex: Sans coriandre, extra piment, allergies...",
+    "send": "Commander & Envoyer",
+    "sending": "Envoi en cours...",
     "sent": "Commande envoyée !",
-    "quantity": "Quantité"
+    "payNote": "Paiement au comptoir après le repas",
+    "cgv": "En commandant, vous acceptez nos CGV. Vos points de fidélité sont calculés automatiquement.",
+    "gift": "CADEAU",
+    "noPointsTitle": "Pas de points ?",
+    "noPointsMsg": "Continuer sans gagner de points ?"
+  },
+  "combo": {
+    "question": "Envie d'une entrée avec votre plat ?",
+    "justDish": "Juste le plat (Pas d'entrée)",
+    "formule": "Formule Entrée (+3.80€)",
+    "addToCart": "Ajouter au panier"
   },
   "loyalty": {
-    "title": "Fidélité",
-    "points": "Points",
-    "login": "Connexion membre",
-    "phone": "Numéro de téléphone",
-    "loginBtn": "Se connecter",
-    "guest": "Continuer sans compte",
-    "smsConsent": "J'accepte de recevoir des offres par SMS",
-    "yourPoints": "Vos points",
+    "title": "Fidélité Pho Bamboo",
+    "subtitle": "Mangez, cumulez, profitez !",
+    "points": "points",
+    "available": "points disponibles",
+    "nextReward": "Prochaine récompense",
+    "maxLevel": "Niveau MAX !",
+    "howToEarn": "Comment gagner des points ?",
+    "rule1": "1 € = 1 Point",
+    "rule2": "Les points se débloquent dès 20 € cumulés dans la journée.",
+    "rule3": "(Vos commandes Midi + Soir s'additionnent !)",
+    "rule4": "Points calculés sur le total arrondi à l'entier inférieur.",
     "rewards": "Récompenses",
-    "redeem": "Échanger",
-    "notEnough": "Points insuffisants"
+    "obtain": "Obtenir",
+    "locked": "Bloqué",
+    "change": "Changer",
+    "redeemConfirm": "Dépenser {cost} pts pour : {name} ?",
+    "redeemTitle": "Utiliser les points ?",
+    "redeemed": "Les points seront déduits lors de la validation de la commande.",
+    "notEnough": "Solde insuffisant",
+    "notEnoughMsg": "Vous n'avez pas assez de points.",
+    "tab": "Fidélité"
   },
-  "common": { "close": "Fermer", "confirm": "Confirmer", "cancel": "Annuler", "back": "Retour" }
+  "login": {
+    "title": "Fidélité Pho Bamboo",
+    "message": "Entrez votre numéro de téléphone pour cumuler des points à chaque commande :",
+    "placeholder": "Ex: 0612345678",
+    "consentTerms": "J'accepte les CGU et la Politique de confidentialité.",
+    "account": "Compte Fidélité",
+    "offers": "Offres & Promos",
+    "offersDesc": "J'accepte de recevoir des réductions et actualités par SMS.",
+    "submit": "Se connecter",
+    "guest": "Continuer sans compte",
+    "invalid": "Numéro invalide",
+    "invalidMsg": "10 chiffres requis (ex: 06...)"
+  },
+  "infos": {
+    "findUs": "Nous trouver",
+    "hours": "Horaires",
+    "contact": "Contact",
+    "scanToOrder": "Pour commander, scannez le QR code sur votre table.",
+    "reserveNote": "Réservation conseillée le midi."
+  },
+  "common": {
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "back": "Retour"
+  }
 }
