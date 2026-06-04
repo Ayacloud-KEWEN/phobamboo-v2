@@ -99,7 +99,13 @@
     "hours": "营业时间",
     "contact": "联系方式",
     "scanToOrder": "点餐请扫描餐桌上的二维码。",
-    "reserveNote": "建议午餐时段预订。"
+    "reserveNote": "建议午餐时段预订。",
+    "viewMap": "在地图查看",
+    "monSat": "周一至周六",
+    "sunday": "周日",
+    "closed": "休息",
+    "serviceMin": "堂食每位最低消费 15€。",
+    "rights": "版权所有。"
   },
   "common": {
     "close": "关闭",

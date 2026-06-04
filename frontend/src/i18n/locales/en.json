@@ -99,7 +99,13 @@
     "hours": "Hours",
     "contact": "Contact",
     "scanToOrder": "To order, scan the QR code on your table.",
-    "reserveNote": "Reservation recommended at lunch."
+    "reserveNote": "Reservation recommended at lunch.",
+    "viewMap": "View on map",
+    "monSat": "Mon - Sat",
+    "sunday": "Sunday",
+    "closed": "Closed",
+    "serviceMin": "Dine-in from €15/person.",
+    "rights": "All rights reserved."
   },
   "common": {
     "close": "Close",

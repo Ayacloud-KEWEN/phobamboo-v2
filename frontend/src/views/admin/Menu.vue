@@ -47,7 +47,10 @@
               <button @click="store.toggleAvailability(p)" :title="p.available ? 'Disponible' : 'Masqué'" class="w-10 h-6 rounded-full transition relative" :class="p.available ? 'bamboo-bg' : 'bg-gray-300'">
                 <span class="absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all" :class="p.available ? 'left-[18px]' : 'left-0.5'"></span>
               </button>
-              <button @click="openProduct(p)" class="text-gray-400 hover:text-gray-700"><i class="fas fa-pen"></i></button>
+              <div class="flex items-center gap-3">
+                <button @click="openProduct(p)" class="text-gray-400 hover:text-gray-700" title="Modifier"><i class="fas fa-pen"></i></button>
+                <button @click="deleteRow(p)" class="text-gray-300 hover:text-red-500" title="Supprimer"><i class="fas fa-trash"></i></button>
+              </div>
             </div>
           </div>
         </div>
@@ -133,6 +136,16 @@ async function onDeleteProduct(id) {
   await store.deleteProduct(id);
   productModal.value = false;
   toast('Supprimé', 'success');
+}
+async function deleteRow(p) {
+  const label = p.nameFr || p.nameEn || p.nameZh || 'ce plat';
+  if (!confirm(`Supprimer « ${label} » ? Cette action est irréversible.`)) return;
+  try {
+    await store.deleteProduct(p.id);
+    toast('Supprimé', 'success');
+  } catch {
+    toast('Erreur', 'error');
+  }
 }
 async function onSaveReward(payload) {
   try {
