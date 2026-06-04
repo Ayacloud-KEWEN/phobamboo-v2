@@ -100,7 +100,7 @@ PUBLIC_URL=""                            # garder vide (liens images relatifs)
 Puis :
 ```bash
 npm ci
-npx prisma migrate deploy     # crée les tables
+npx prisma db push            # crée/synchronise les tables depuis le schéma
 npm run seed                  # crée la config + le compte admin
 ```
 
@@ -140,7 +140,7 @@ Aucun changement de code : tout est servi en même origine.
 ```bash
 cd /home/phobamboo/app && git pull
 cd frontend && npm ci && npm run build
-cd ../backend && npm ci && npx prisma migrate deploy && pm2 restart phobamboo
+cd ../backend && npm ci && npx prisma db push && pm2 restart phobamboo
 ```
 
 ## Sauvegarde base de données

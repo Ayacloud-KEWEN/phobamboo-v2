@@ -53,8 +53,8 @@ step "安装后端依赖"
 cd "$ROOT/backend"
 npm ci
 
-step "应用数据库迁移"
-npx prisma migrate deploy
+step "同步数据库表结构（按 schema 建表/更新，幂等）"
+npx prisma db push
 
 step "初始化默认配置 + 管理员账号（幂等）"
 npm run seed
