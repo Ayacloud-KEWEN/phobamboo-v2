@@ -92,6 +92,29 @@
     <LoyaltyModal v-if="loyaltyOpen" @close="loyaltyOpen = false" @logout="logout" />
     <LoginModal v-if="loginOpen" @close="loginOpen = false" @success="loginOpen = false" />
     <InfosModal v-if="infosOpen" @close="infosOpen = false" />
+
+    <!-- Table number modal -->
+    <div v-if="tableModalOpen" class="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4" @click.self="tableModalOpen = false">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden">
+        <div class="bamboo-gradient h-3 w-full"></div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold bamboo-text mb-1 flex items-center"><i class="fas fa-table mr-2"></i>{{ t('order.table') }}</h3>
+          <p class="text-sm text-gray-500 mb-4">{{ t('order.tablePrompt') }}</p>
+          <input
+            v-model="tableInput"
+            type="text"
+            inputmode="numeric"
+            class="w-full border-2 border-gray-200 rounded-xl p-3 text-lg text-center font-bold focus:border-green-600 outline-none"
+            :placeholder="t('order.takeaway')"
+            @keyup.enter="saveTable"
+          />
+          <div class="flex gap-3 mt-5">
+            <button @click="tableModalOpen = false" class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold">{{ t('common.cancel') }}</button>
+            <button @click="saveTable" class="flex-1 py-3 rounded-xl bamboo-gradient text-white font-bold">{{ t('common.confirm') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -125,6 +148,8 @@ const loyaltyOpen = ref(false);
 const loginOpen = ref(false);
 const infosOpen = ref(false);
 const comboProduct = ref(null);
+const tableModalOpen = ref(false);
+const tableInput = ref('');
 
 const categories = computed(() => menu.activeCategories);
 const visible = computed(() => menu.byCategory(category.value));
@@ -162,8 +187,12 @@ function onSent() {
   cartOpen.value = false;
 }
 function editTable() {
-  const v = prompt(t('order.table'), cart.table);
-  if (v !== null) cart.table = v.trim();
+  tableInput.value = cart.table;
+  tableModalOpen.value = true;
+}
+function saveTable() {
+  cart.table = tableInput.value.trim();
+  tableModalOpen.value = false;
 }
 function scrollTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -36,7 +36,7 @@
         <p class="text-gray-500 max-w-lg mx-auto">{{ t('menu.subtitle') }}</p>
       </div>
 
-      <CategoryTabs v-model="category" :categories="categories" />
+      <div class="mb-8"><CategoryTabs v-model="category" :categories="categories" /></div>
 
       <div v-if="menu.loading" class="text-center py-20 text-gray-400">
         <i class="fas fa-circle-notch fa-spin text-3xl mb-3 bamboo-text"></i>

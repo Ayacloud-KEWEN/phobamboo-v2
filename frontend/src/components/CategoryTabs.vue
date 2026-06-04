@@ -1,6 +1,6 @@
 <template>
-  <!-- Desktop pills -->
-  <div class="hidden sm:flex justify-center flex-wrap gap-3 mb-8 fade-in">
+  <!-- Desktop pills (only when not in mobile/nav mode) -->
+  <div v-if="!mobile" class="hidden sm:flex justify-center flex-wrap gap-3 fade-in">
     <button
       v-for="c in categories"
       :key="c"

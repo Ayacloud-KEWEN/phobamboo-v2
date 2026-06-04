@@ -49,7 +49,8 @@
     "cgv": "下单即表示接受我们的条款。积分将自动计算。",
     "gift": "赠品",
     "noPointsTitle": "不要积分？",
-    "noPointsMsg": "不登录继续（不累计积分）？"
+    "noPointsMsg": "不登录继续（不累计积分）？",
+    "tablePrompt": "请输入桌号："
   },
   "combo": {
     "question": "要不要配一份前菜？",

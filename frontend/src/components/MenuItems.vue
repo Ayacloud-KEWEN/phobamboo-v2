@@ -8,8 +8,8 @@
         </h3>
       </div>
 
-      <!-- Drinks & alcohol → list rows -->
-      <div v-if="isDrink" class="max-w-3xl mx-auto mb-6">
+      <!-- Drinks & alcohol → list rows (2 columns on desktop) -->
+      <div v-if="isDrink" class="grid grid-cols-1 lg:grid-cols-2 gap-x-10 max-w-5xl mx-auto mb-6">
         <DrinkRow
           v-for="p in group.items"
           :key="p.id"

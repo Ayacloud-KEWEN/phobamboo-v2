@@ -49,7 +49,8 @@
     "cgv": "En commandant, vous acceptez nos CGV. Vos points de fidélité sont calculés automatiquement.",
     "gift": "CADEAU",
     "noPointsTitle": "Pas de points ?",
-    "noPointsMsg": "Continuer sans gagner de points ?"
+    "noPointsMsg": "Continuer sans gagner de points ?",
+    "tablePrompt": "Numéro de table :"
   },
   "combo": {
     "question": "Envie d'une entrée avec votre plat ?",

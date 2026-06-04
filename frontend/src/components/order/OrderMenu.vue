@@ -8,7 +8,7 @@
         <div class="ml-3 h-px bg-gray-200 flex-1"></div>
       </div>
 
-      <div v-if="isDrink" class="mb-4">
+      <div v-if="isDrink" class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 mb-4">
         <DrinkRow
           v-for="p in group.items"
           :key="p.id"

@@ -49,7 +49,8 @@
     "cgv": "By ordering, you accept our terms. Loyalty points are calculated automatically.",
     "gift": "GIFT",
     "noPointsTitle": "No points?",
-    "noPointsMsg": "Continue without earning points?"
+    "noPointsMsg": "Continue without earning points?",
+    "tablePrompt": "Table number:"
   },
   "combo": {
     "question": "Want a starter with your dish?",
