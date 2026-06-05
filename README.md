@@ -47,6 +47,7 @@ bash scripts/deploy.sh                 # 安装依赖、build、迁移、seed、
 并启用 Let's Encrypt SSL，代码无需改动。
 
 ## 详细文档
+- [使用说明.md](使用说明.md) —— **给餐馆老板看的通俗操作手册**
 - [CHANGELOG.md](CHANGELOG.md) —— 更新记录
 - [backend/README.md](backend/README.md) —— API、数据模型、Firebase 迁移
 - [frontend/README.md](frontend/README.md) —— 路由、i18n、复用说明
