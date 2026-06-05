@@ -141,12 +141,15 @@ async function generate() {
 function printAll() {
   const cards = codes.value
     .map(
-      (c) => `<div style="display:inline-flex;flex-direction:column;align-items:center;width:260px;margin:14px;padding:16px;border:1px solid #ddd;border-radius:12px;page-break-inside:avoid;">
-        <div style="font-size:18px;font-weight:bold;color:#2d5a27;margin-bottom:6px;">${cfg.name}</div>
-        <img src="${c.dataUrl}" style="width:220px;height:220px;" />
-        <div style="font-size:22px;font-weight:bold;margin-top:8px;">${c.label}</div>
-        <div style="font-size:12px;color:#666;margin-top:4px;">Scannez pour commander</div>
-        <div style="font-size:13px;color:#2d5a27;font-weight:bold;margin-top:6px;">${host.value}</div>
+      (c) => `<div style="display:inline-block;vertical-align:top;width:300px;margin:12px;border:3px solid #2d5a27;border-radius:18px;overflow:hidden;page-break-inside:avoid;">
+        <div style="background:#2d5a27;color:#fff;padding:10px;text-align:center;font-size:18px;font-weight:bold;letter-spacing:1px;">${cfg.name}</div>
+        <div style="padding:16px;text-align:center;">
+          <div style="display:inline-block;background:#2d5a27;color:#fff;font-size:20px;font-weight:bold;padding:4px 20px;border-radius:999px;margin-bottom:12px;">${c.label}</div>
+          <div><img src="${c.dataUrl}" style="width:230px;height:230px;" /></div>
+          <div style="font-size:15px;font-weight:bold;color:#222;margin-top:10px;">Scannez pour commander</div>
+          <div style="font-size:15px;color:#444;margin-top:2px;">扫码点餐</div>
+          <div style="font-size:13px;color:#2d5a27;font-weight:bold;margin-top:8px;letter-spacing:0.5px;">${host.value}</div>
+        </div>
       </div>`
     )
     .join('');
@@ -155,7 +158,7 @@ function printAll() {
   document.body.appendChild(frame);
   const doc = frame.contentWindow.document;
   doc.open();
-  doc.write(`<html><head><title>QR Tables</title></head><body style="text-align:center;font-family:Arial,sans-serif;">${cards}</body></html>`);
+  doc.write(`<html><head><title>QR Tables</title></head><body style="text-align:center;font-family:Arial,Helvetica,sans-serif;margin:0;padding:16px;">${cards}</body></html>`);
   doc.close();
   frame.contentWindow.focus();
   setTimeout(() => {
