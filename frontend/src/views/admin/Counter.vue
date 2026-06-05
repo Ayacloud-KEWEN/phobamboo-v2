@@ -362,7 +362,6 @@ async function search() {
   try {
     const { data } = await api.get(`/api/members/${encodeURIComponent(phone)}`);
     member.value = data;
-    nameInput.value = data.name || '';
     loadHistory(data.phone);
   } catch {
     member.value = null;
@@ -375,6 +374,8 @@ async function loadHistory(phone) {
   try {
     const { data } = await api.get(`/api/members/${encodeURIComponent(phone)}/orders`);
     memberHistory.value = data;
+    // Full profile (incl. name) comes from this admin endpoint, not the public one.
+    nameInput.value = data.member?.name || '';
   } catch {
     memberHistory.value = null;
   }

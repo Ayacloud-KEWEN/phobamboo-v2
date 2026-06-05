@@ -5,14 +5,19 @@ import { emitMemberUpdate } from '../lib/realtime.js';
 
 const router = Router();
 
-// GET /api/members/:phone — customer checks own points (public) or counter lookup.
+// GET /api/members/:phone — customer checks own points (public).
+// PUBLIC endpoint: only expose the loyalty balance, never name/SMS consent.
 router.get('/:phone', async (req, res) => {
-  const member = await prisma.member.findUnique({ where: { phone: req.params.phone } });
+  const member = await prisma.member.findUnique({
+    where: { phone: req.params.phone },
+    select: { phone: true, points: true },
+  });
   if (!member) return res.status(404).json({ error: 'Not found' });
   res.json(member);
 });
 
 // POST /api/members — create/ensure a member exists (customer login, public).
+// Returns only phone + points (no PII back to the public).
 router.post('/', async (req, res) => {
   const phone = String(req.body.phone || '');
   if (!phone) return res.status(400).json({ error: 'Phone required' });
@@ -20,6 +25,7 @@ router.post('/', async (req, res) => {
     where: { phone },
     create: { phone, acceptsSMS: !!req.body.acceptsSMS },
     update: req.body.acceptsSMS === undefined ? {} : { acceptsSMS: !!req.body.acceptsSMS },
+    select: { phone: true, points: true },
   });
   res.json(member);
 });
@@ -43,7 +49,9 @@ router.get('/:phone/orders', requireAuth, async (req, res) => {
     _sum: { total: true },
     _count: true,
   });
+  const member = await prisma.member.findUnique({ where: { phone } }); // admin: full profile OK
   res.json({
+    member,
     orders,
     visits: all._count,
     lifetimeSpend: Number((all._sum.total || 0).toFixed(2)),

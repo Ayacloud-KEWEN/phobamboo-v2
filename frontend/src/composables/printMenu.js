@@ -5,12 +5,15 @@ import { localizedName } from '../i18n';
 // Mirrors the original "Menu PDF" export: grouped by category + sub-category.
 const GROUPED = ['menus', 'plats', 'boissons', 'alcool'];
 
+const esc = (v) =>
+  String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 export function printMenu(products, restaurantName = 'PHO BAMBOO') {
   const byCat = (cat) => products.filter((p) => p.category === cat);
 
   let html = `<div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#000;max-width:800px;margin:0 auto;">
     <div style="text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #2d5a27;">
-      <h1 style="color:#2d5a27;font-size:32px;margin:0 0 10px;letter-spacing:2px;font-weight:bold;">${restaurantName.toUpperCase()}</h1>
+      <h1 style="color:#2d5a27;font-size:32px;margin:0 0 10px;letter-spacing:2px;font-weight:bold;">${esc(restaurantName.toUpperCase())}</h1>
       <div style="font-size:14px;color:#555;">
         <p style="margin:5px 0;">Galerie commerciale Gare RER La Défense, 92800 Puteaux</p>
         <p style="margin:5px 0;"><strong>Tél: 07 60 73 64 65</strong></p>
@@ -30,19 +33,19 @@ export function printMenu(products, restaurantName = 'PHO BAMBOO') {
     }
 
     html += `<div style="margin-bottom:30px;page-break-inside:avoid;">
-      <h2 style="background:#f0fdf4;color:#166534;font-size:18px;padding:10px;border-left:5px solid #166534;margin-bottom:15px;text-transform:uppercase;font-weight:bold;">${cat}</h2>
+      <h2 style="background:#f0fdf4;color:#166534;font-size:18px;padding:10px;border-left:5px solid #166534;margin-bottom:15px;text-transform:uppercase;font-weight:bold;">${esc(cat)}</h2>
       <table style="width:100%;border-collapse:collapse;">`;
 
     for (const key of Object.keys(groups).sort()) {
       if (key !== 'General') {
-        html += `<tr><td colspan="2" style="padding:15px 0 5px;font-weight:bold;font-size:14px;color:#4a7c59;border-bottom:1px solid #eee;text-transform:uppercase;letter-spacing:1px;">• ${key}</td></tr>`;
+        html += `<tr><td colspan="2" style="padding:15px 0 5px;font-weight:bold;font-size:14px;color:#4a7c59;border-bottom:1px solid #eee;text-transform:uppercase;letter-spacing:1px;">• ${esc(key)}</td></tr>`;
       }
       for (const item of groups[key]) {
-        const name = localizedName(item);
+        const name = esc(localizedName(item));
         html += `<tr style="border-bottom:1px dotted #ccc;">
           <td style="padding:10px 15px 10px 0;vertical-align:top;">
             <div style="font-size:15px;font-weight:bold;color:#222;">${name}</div>
-            ${item.description ? `<div style="font-size:12px;color:#666;margin-top:4px;">${item.description}</div>` : ''}
+            ${item.description ? `<div style="font-size:12px;color:#666;margin-top:4px;">${esc(item.description)}</div>` : ''}
           </td>
           <td style="padding:10px 0;text-align:right;vertical-align:top;width:80px;font-weight:bold;font-size:15px;color:#166534;">${item.price.toFixed(2)}€</td>
         </tr>`;

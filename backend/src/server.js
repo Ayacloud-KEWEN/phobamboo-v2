@@ -28,6 +28,9 @@ const HOST = process.env.HOST || '0.0.0.0';
 const ORIGINS = (process.env.CORS_ORIGINS || '*').split(',').map((s) => s.trim());
 const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || './uploads');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+if (JWT_SECRET === 'dev-secret') {
+  console.warn('⚠️  JWT_SECRET non défini ! Mettez une valeur aléatoire dans .env (openssl rand -hex 32) avant la prod.');
+}
 
 // Trust the first proxy hop (CloudPanel/Nginx) so req.ip is the real client IP.
 app.set('trust proxy', 1);
