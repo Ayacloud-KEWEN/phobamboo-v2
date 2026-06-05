@@ -24,6 +24,13 @@
         </div>
         <div v-if="tab === 'orders'" class="flex items-center gap-3">
           <button
+            @click="load"
+            class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700"
+            title="Rafraîchir"
+          >
+            <i class="fas fa-rotate" :class="{ 'fa-spin': loading }"></i>
+          </button>
+          <button
             @click="toggleSound"
             class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700"
             :title="soundOn ? 'Son activé' : 'Son coupé'"

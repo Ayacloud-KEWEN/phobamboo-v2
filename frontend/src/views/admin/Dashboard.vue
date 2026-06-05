@@ -4,7 +4,10 @@
     <div class="px-4 py-5 max-w-6xl mx-auto">
       <div v-if="loading" class="text-center text-slate-500 py-20"><i class="fas fa-circle-notch fa-spin text-3xl"></i></div>
       <template v-else>
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end gap-2 mb-4">
+          <button @click="refresh" :disabled="refreshing" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50">
+            <i class="fas fa-rotate mr-2 text-blue-400" :class="{ 'fa-spin': refreshing }"></i>Rafraîchir
+          </button>
           <button @click="exportCsv" :disabled="exporting" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50">
             <i :class="exporting ? 'fas fa-circle-notch fa-spin' : 'fas fa-file-csv'" class="mr-2 text-green-400"></i>Exporter CSV ({{ rangeDays }}j)
           </button>
@@ -112,6 +115,7 @@ const auth = useAuthStore();
 
 const loading = ref(true);
 const exporting = ref(false);
+const refreshing = ref(false);
 const summary = ref({ revenue: 0, paidOrderCount: 0, memberCount: 0, totalPoints: 0 });
 const daily = ref([]);
 const members = ref([]);
@@ -146,15 +150,28 @@ async function exportCsv() {
   }
 }
 
+async function loadAll() {
+  const [s, m] = await Promise.all([
+    api.get('/api/stats/summary'),
+    api.get('/api/members'),
+  ]);
+  summary.value = s.data;
+  members.value = m.data.slice(0, 15);
+  await loadDaily();
+}
+
+async function refresh() {
+  refreshing.value = true;
+  try {
+    await loadAll();
+  } finally {
+    refreshing.value = false;
+  }
+}
+
 onMounted(async () => {
   try {
-    const [s, m] = await Promise.all([
-      api.get('/api/stats/summary'),
-      api.get('/api/members'),
-    ]);
-    summary.value = s.data;
-    members.value = m.data.slice(0, 15);
-    await loadDaily();
+    await loadAll();
   } finally {
     loading.value = false;
   }
