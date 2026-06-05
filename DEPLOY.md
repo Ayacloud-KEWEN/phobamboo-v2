@@ -127,14 +127,56 @@ Ouvrez le port 4000 (firewall / CloudPanel) puis visitez `http://IP_DU_VPS:4000`
 - Client : `http://IP_DU_VPS:4000/` et `/order?table=5`
 - Back-office : `http://IP_DU_VPS:4000/admin/login` (admin / phobamboo)
 
-## 7. Plus tard : domaine + HTTPS via CloudPanel
-1. Dans CloudPanel : **+ Add Site → Reverse Proxy** (ou un site Node.js).
-2. Domaine : `phobamboo.com`. Reverse proxy vers `http://127.0.0.1:4000`.
-3. Onglet **SSL/TLS → Let's Encrypt** : certificat automatique.
-4. Assurez-vous que CloudPanel transmet les WebSockets (Upgrade/Connection headers) —
-   le template Reverse Proxy de CloudPanel le fait par défaut pour `/`.
+## 7. Domaine + HTTPS via CloudPanel (phobamboo.fr)
 
-Aucun changement de code : tout est servi en même origine.
+### 7.1 DNS — faire pointer le domaine vers le VPS
+Chez le registrar / la zone DNS de `phobamboo.fr` :
+- `A`  `@`   → `51.210.7.13` (IP du VPS)
+- `A`  `www` → `51.210.7.13`
+Supprimez les anciens enregistrements qui pointaient vers l'ancien hébergeur.
+Attendez la propagation (quelques minutes à quelques heures). Vérifier :
+```bash
+dig +short phobamboo.fr     # doit renvoyer 51.210.7.13
+```
+
+### 7.2 CloudPanel — créer le site reverse proxy
+1. CloudPanel → **+ Add Site → Create a Reverse Proxy**.
+2. **Reverse Proxy URL** : `http://127.0.0.1:4000`
+3. **Domain Name** : `phobamboo.fr` (ajoutez aussi `www.phobamboo.fr`).
+4. Créer le site.
+
+### 7.3 WebSocket (Socket.IO)
+Le temps réel (comptoir/cuisine) a besoin que Nginx transmette l'upgrade WebSocket.
+Dans CloudPanel → le site → onglet **Vhost**, vérifiez/ajoutez dans le `location /` (ou un bloc dédié) :
+```nginx
+location /socket.io/ {
+    proxy_pass http://127.0.0.1:4000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+Sauvegardez (CloudPanel recharge Nginx).
+
+### 7.4 SSL Let's Encrypt
+Site → onglet **SSL/TLS → Let's Encrypt → Issue** (couvre phobamboo.fr + www).
+CloudPanel force ensuite le HTTPS automatiquement.
+
+### 7.5 Sécuriser : ne plus exposer :4000
+Une fois `https://phobamboo.fr` opérationnel :
+```bash
+# 1) le backend n'écoute plus que en local
+nano /home/app/backend/.env      # mettre : HOST=127.0.0.1
+pm2 restart phobamboo
+# 2) fermer le port 4000 au public (si ouvert pour les tests)
+sudo ufw delete allow 4000 2>/dev/null || true
+```
+Désormais tout passe par `https://phobamboo.fr` (proxy CloudPanel → 127.0.0.1:4000).
+Aucun changement de code : tout est servi en même origine, les liens images
+`/uploads/...` et les QR `/order?table=N` fonctionnent tels quels.
 
 ## Mises à jour ultérieures
 ```bash

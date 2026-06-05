@@ -22,6 +22,9 @@ import marketingRoutes from './routes/marketing.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+// Bind address. Once behind the CloudPanel reverse proxy, set HOST=127.0.0.1
+// so the app is no longer reachable directly from the internet on :PORT.
+const HOST = process.env.HOST || '0.0.0.0';
 const ORIGINS = (process.env.CORS_ORIGINS || '*').split(',').map((s) => s.trim());
 const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || './uploads');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
@@ -119,6 +122,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`🎋 PhoBamboo backend listening on :${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`🎋 PhoBamboo backend listening on ${HOST}:${PORT}`);
 });
