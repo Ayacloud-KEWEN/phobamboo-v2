@@ -91,7 +91,7 @@ function scrollTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function onPrint() {
-  printMenu(menu.products, cfg.name);
+  printMenu(menu.products, { name: cfg.name, logo: cfg.logo });
 }
 function onScroll() {
   showTop.value = window.scrollY > 300;
