@@ -150,11 +150,14 @@ const tableInput = ref('');
 
 const categories = computed(() => menu.activeCategories);
 const visible = computed(() => menu.byCategory(category.value));
-const comboEntrees = computed(() =>
-  comboProduct.value
-    ? menu.products.filter((p) => (comboProduct.value.comboOptions || []).some((id) => String(id) === String(p.id)))
-    : []
-);
+// Entrées for the combo modal are resolved server-side (works even if an
+// entrée isn't separately available); fall back to a local lookup just in case.
+const comboEntrees = computed(() => {
+  const p = comboProduct.value;
+  if (!p) return [];
+  if (Array.isArray(p.comboEntrees) && p.comboEntrees.length) return p.comboEntrees;
+  return menu.products.filter((x) => (p.comboOptions || []).some((id) => String(id) === String(x.id)));
+});
 
 watch(categories, (list) => {
   if (!category.value && list.length) category.value = list[0];

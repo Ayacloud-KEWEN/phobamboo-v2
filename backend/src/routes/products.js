@@ -12,7 +12,26 @@ router.get('/', async (req, res) => {
     where,
     orderBy: [{ sortOrder: 'asc' }, { nameFr: 'asc' }],
   });
-  res.json(products);
+
+  // Resolve combo entrée options (by id) so the order page can show them even
+  // if a referenced entrée isn't separately listed/available in this result.
+  const ids = new Set();
+  for (const p of products) for (const id of Array.isArray(p.comboOptions) ? p.comboOptions : []) ids.add(String(id));
+  let entreeMap = {};
+  if (ids.size) {
+    const entrees = await prisma.product.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, nameFr: true, nameEn: true, nameZh: true, image: true, price: true },
+    });
+    entreeMap = Object.fromEntries(entrees.map((e) => [e.id, e]));
+  }
+  const out = products.map((p) => ({
+    ...p,
+    comboEntrees: (Array.isArray(p.comboOptions) ? p.comboOptions : [])
+      .map((id) => entreeMap[String(id)])
+      .filter(Boolean),
+  }));
+  res.json(out);
 });
 
 // Everything below requires admin auth (menu page).
