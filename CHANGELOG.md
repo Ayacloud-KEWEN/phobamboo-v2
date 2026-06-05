@@ -64,3 +64,10 @@
 - **子分类标题**去掉排序前缀（如「0- Plats」→「Plats」）。
 - **套餐补价可配置**（RestaurantConfig.comboPrice，老板设置里可改）。
 - **数据库每日自动备份**脚本 `scripts/backup.sh`（保留 14 天）+ cron 说明。
+
+### 📈 统计增强 + PWA
+- **畅销菜排行**：统计页新增「最畅销菜品」表（按销量排，含销量/营收），可选时段。
+- **CSV 导出**：一键导出已付订单明细（日期/订单号/桌号/电话/金额/积分/菜品），
+  带 BOM，Excel 直接打开不乱码。
+- **PWA**：可「添加到主屏」当 App 用；菜单/图片离线缓存（vite-plugin-pwa），
+  弱网/断网也能看菜单。含 manifest、Service Worker、iOS 图标。
