@@ -68,6 +68,7 @@ import { useI18n } from 'vue-i18n';
 import { useMenuStore } from '../stores/menu';
 import { useConfigStore } from '../stores/config';
 import { printMenu } from '../composables/printMenu';
+import { applyDefaultManifest } from '../composables/useAdminPwa';
 import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 import CategoryTabs from '../components/CategoryTabs.vue';
 import MenuItems from '../components/MenuItems.vue';
@@ -97,6 +98,7 @@ function onScroll() {
 }
 
 onMounted(async () => {
+  applyDefaultManifest(); // keep home icon → home page
   window.addEventListener('scroll', onScroll);
   await menu.loadPublic();
 });

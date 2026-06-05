@@ -131,6 +131,7 @@ import ComboModal from '../components/order/ComboModal.vue';
 import LoyaltyModal from '../components/order/LoyaltyModal.vue';
 import LoginModal from '../components/order/LoginModal.vue';
 import InfosModal from '../components/order/InfosModal.vue';
+import { applyOrderManifest } from '../composables/useAdminPwa';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -199,6 +200,7 @@ function scrollTop() {
 }
 
 onMounted(async () => {
+  applyOrderManifest(); // "Add to Home Screen" here → opens /order
   if (route.query.table) cart.table = String(route.query.table);
   await menu.loadPublic();
   if (member.loggedIn) member.refresh();
