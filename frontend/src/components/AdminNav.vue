@@ -46,6 +46,7 @@ const links = computed(() => {
     { to: '/admin/counter', icon: 'fa-cash-register', label: 'Comptoir' },
     { to: '/admin/dashboard', icon: 'fa-chart-line', label: 'Stats' },
     { to: '/admin/menu', icon: 'fa-list', label: 'Menu' },
+    { to: '/admin/qrcodes', icon: 'fa-qrcode', label: 'QR' },
   ];
   if (cfg.kdsEnabled) base.push({ to: '/admin/kds', icon: 'fa-kitchen-set', label: 'Cuisine' });
   return base;

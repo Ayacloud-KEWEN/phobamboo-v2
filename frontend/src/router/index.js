@@ -10,6 +10,7 @@ const routes = [
   // Back-office
   { path: '/admin/login', name: 'login', component: () => import('../views/admin/Login.vue') },
   { path: '/admin/menu', name: 'menu', component: () => import('../views/admin/Menu.vue'), meta: { auth: true } },
+  { path: '/admin/qrcodes', name: 'qrcodes', component: () => import('../views/admin/QrCodes.vue'), meta: { auth: true } },
   { path: '/admin/counter', name: 'counter', component: () => import('../views/admin/Counter.vue'), meta: { auth: true } },
   { path: '/admin/dashboard', name: 'dashboard', component: () => import('../views/admin/Dashboard.vue'), meta: { auth: true } },
   {
