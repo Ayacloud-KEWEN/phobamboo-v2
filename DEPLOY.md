@@ -144,6 +144,16 @@ cd ../backend && npm ci && npx prisma db push && pm2 restart phobamboo
 ```
 
 ## Sauvegarde base de données
+
+### Manuelle
 ```bash
 pg_dump -U phobamboo phobamboo > backup_$(date +%F).sql
+```
+
+### Automatique quotidienne (recommandé)
+Le script `scripts/backup.sh` exporte + compresse + garde les 14 derniers jours.
+```bash
+bash scripts/backup.sh           # test manuel → backups/phobamboo_*.sql.gz
+crontab -e                       # planifier (3h30 chaque nuit) :
+# 30 3 * * * /bin/bash /home/app/scripts/backup.sh >> /home/app/backup.log 2>&1
 ```

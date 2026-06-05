@@ -24,6 +24,10 @@
           <span class="text-xs text-slate-400">Points par €</span>
           <input v-model.number="form.pointsPerEuro" type="number" step="0.1" class="w-full mt-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
         </label>
+        <label class="block">
+          <span class="text-xs text-slate-400">Supplément formule entrée (€)</span>
+          <input v-model.number="form.comboPrice" type="number" step="0.1" class="w-full mt-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+        </label>
       </div>
 
       <button @click="save" :disabled="saving" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold disabled:opacity-50">
@@ -46,6 +50,7 @@ const form = reactive({
   kdsEnabled: cfg.kdsEnabled,
   pointsThreshold: cfg.pointsThreshold,
   pointsPerEuro: cfg.pointsPerEuro,
+  comboPrice: cfg.comboPrice,
 });
 
 async function save() {

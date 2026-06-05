@@ -4,38 +4,38 @@ import { useConfigStore } from './config';
 import { useMemberStore } from './member';
 
 const STORAGE_KEY = 'pb_cart';
-export const COMBO_PRICE_ADDITION = 3.8; // "Formule Entrée" supplement (€)
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // Drop items saved by an older version (missing productId/rewardId) so the
+    // new id-based checkout never sends invalid lines.
+    return items.filter((i) => (i.isReward ? i.rewardId : i.productId));
   } catch {
     return [];
   }
 }
 
-// Cart + checkout. Table number comes from the QR code (?table=) via the router.
+// Cart + checkout. Display fields (names/price/image) are local convenience only;
+// at checkout we send product/reward IDs and the SERVER recomputes all amounts.
 export const useCartStore = defineStore('cart', {
   state: () => ({
     table: '',
-    items: load(), // [{ id, nameFr,nameEn,nameZh, price, quantity, image, isReward, pointsCost }]
+    items: load(), // { id, productId|rewardId, comboEntreeId?, nameFr/En/Zh, price, quantity, image, isReward, pointsCost }
     notes: '',
   }),
   getters: {
     count: (s) => s.items.reduce((n, i) => n + i.quantity, 0),
     total: (s) => Number(s.items.reduce((t, i) => t + i.price * i.quantity, 0).toFixed(2)),
     pointsToSpend: (s) => s.items.reduce((n, i) => n + (i.pointsCost || 0) * i.quantity, 0),
-    // Loyalty preview: nothing below the daily threshold, else floor(total*rate).
     pointsToEarn() {
       const cfg = useConfigStore();
       if (this.total < (cfg.pointsThreshold ?? 20)) return 0;
       return Math.floor(this.total * (cfg.pointsPerEuro || 1));
     },
-    // Quantity of a base dish in the cart (sums combo variants sharing the base id).
-    quantityOf: (s) => (baseId) =>
-      s.items
-        .filter((i) => !i.isReward && (i.id === baseId || i.id.startsWith(baseId + '_')))
-        .reduce((n, i) => n + i.quantity, 0),
+    // Quantity of a base dish (sums its combo variants too).
+    quantityOf: (s) => (productId) =>
+      s.items.filter((i) => !i.isReward && i.productId === productId).reduce((n, i) => n + i.quantity, 0),
   },
   actions: {
     persist() {
@@ -50,6 +50,7 @@ export const useCartStore = defineStore('cart', {
     add(product) {
       this._push({
         id: product.id,
+        productId: product.id,
         nameFr: product.nameFr,
         nameEn: product.nameEn,
         nameZh: product.nameZh,
@@ -58,16 +59,18 @@ export const useCartStore = defineStore('cart', {
         isReward: false,
       });
     },
-    // Combo: base dish optionally + an entrée (adds supplement, distinct id).
     addCombo(product, entree) {
       if (!entree) return this.add(product);
+      const cfg = useConfigStore();
       const suffix = ` (+ ${entree.nameFr || entree.nameEn || entree.nameZh})`;
       this._push({
         id: `${product.id}_${entree.id}`,
+        productId: product.id,
+        comboEntreeId: entree.id,
         nameFr: (product.nameFr || '') + suffix,
         nameEn: (product.nameEn || '') + suffix,
         nameZh: (product.nameZh || '') + suffix,
-        price: Number((product.price + COMBO_PRICE_ADDITION).toFixed(2)),
+        price: Number((product.price + (cfg.comboPrice ?? 3.8)).toFixed(2)),
         image: product.image,
         isReward: false,
       });
@@ -75,6 +78,7 @@ export const useCartStore = defineStore('cart', {
     addReward(reward) {
       this.items.push({
         id: `reward-${Date.now()}`,
+        rewardId: reward.id,
         nameFr: `🎁 ${reward.nameFr || reward.nameEn || reward.nameZh}`,
         nameEn: `🎁 ${reward.nameEn || reward.nameFr || reward.nameZh}`,
         nameZh: `🎁 ${reward.nameZh || reward.nameFr || reward.nameEn}`,
@@ -104,20 +108,18 @@ export const useCartStore = defineStore('cart', {
     },
     async submit() {
       const member = useMemberStore();
-      const payload = {
+      // Send only ids + quantities — the server prices everything.
+      const lines = this.items.map((i) =>
+        i.isReward
+          ? { kind: 'reward', rewardId: i.rewardId, quantity: i.quantity }
+          : { kind: 'product', productId: i.productId, comboEntreeId: i.comboEntreeId || null, quantity: i.quantity }
+      );
+      const { data } = await api.post('/api/orders', {
         table: this.table,
         phone: member.phone || '',
-        items: this.items.map((i) => ({
-          name: i.nameFr || i.nameEn || i.nameZh,
-          quantity: i.quantity,
-          price: i.price,
-        })),
-        total: this.total,
         notes: this.notes,
-        pointsToEarn: member.phone ? this.pointsToEarn : 0,
-        pointsSpent: member.phone ? this.pointsToSpend : 0,
-      };
-      const { data } = await api.post('/api/orders', payload);
+        lines,
+      });
       if (member.phone) await member.refresh();
       this.clear();
       return data;

@@ -13,6 +13,7 @@ export const useConfigStore = defineStore('config', {
     currency: 'EUR',
     pointsPerEuro: 1,
     pointsThreshold: 20,
+    comboPrice: 3.8,
     kdsEnabled: false,
     whatsapp: '',
   }),

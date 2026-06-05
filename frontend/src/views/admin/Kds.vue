@@ -34,6 +34,7 @@
       >
         <div class="flex justify-between items-center p-3 border-b border-gray-700" :class="index === 0 ? 'bg-green-900/30' : 'bg-gray-800'">
           <div class="flex items-center">
+            <span class="text-sm font-bold text-gray-400 mr-2">#{{ o.dailyNumber || '–' }}</span>
             <span class="text-3xl font-black" :class="o.table ? 'text-white' : 'text-blue-400'">
               <i v-if="!o.table" class="fas fa-bag-shopping"></i>
               <template v-else>{{ o.table }}</template>

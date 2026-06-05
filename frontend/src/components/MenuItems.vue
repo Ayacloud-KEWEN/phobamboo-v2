@@ -4,7 +4,7 @@
       <!-- Sub-category header (menus / plats / boissons / alcool) -->
       <div v-if="group.key !== 'General'" class="mt-6 mb-3 border-b border-gray-200 pb-1 fade-in">
         <h3 class="text-xl font-bold bamboo-text uppercase tracking-wide flex items-center">
-          <i class="fas fa-caret-right mr-2 opacity-50"></i>{{ group.key }}
+          <i class="fas fa-caret-right mr-2 opacity-50"></i>{{ clean(group.key) }}
         </h3>
       </div>
 
@@ -50,6 +50,9 @@ const menu = useMenuStore();
 // These categories are grouped by sub-category with section headers.
 const GROUPED = ['menus', 'plats', 'boissons', 'alcool'];
 const isDrink = computed(() => props.category === 'boissons' || props.category === 'alcool');
+
+// Sub-categories often carry a sort prefix like "0- " — hide it in the header.
+const clean = (k) => k.replace(/^\s*\d+\s*[-.)]?\s*/, '');
 
 const groups = computed(() => {
   const items = menu.byCategory(props.category);

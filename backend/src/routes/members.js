@@ -30,6 +30,38 @@ router.get('/', requireAuth, async (req, res) => {
   res.json(members);
 });
 
+// GET /api/members/:phone/orders — recent paid orders + lifetime totals (admin).
+router.get('/:phone/orders', requireAuth, async (req, res) => {
+  const phone = req.params.phone;
+  const orders = await prisma.order.findMany({
+    where: { phone, status: 'paid' },
+    orderBy: { paidAt: 'desc' },
+    take: 20,
+  });
+  const all = await prisma.order.aggregate({
+    where: { phone, status: 'paid' },
+    _sum: { total: true },
+    _count: true,
+  });
+  res.json({
+    orders,
+    visits: all._count,
+    lifetimeSpend: Number((all._sum.total || 0).toFixed(2)),
+  });
+});
+
+// PATCH /api/members/:phone — update profile (name) (admin).
+router.patch('/:phone', requireAuth, async (req, res) => {
+  const data = {};
+  if (req.body.name !== undefined) data.name = String(req.body.name);
+  const member = await prisma.member.upsert({
+    where: { phone: req.params.phone },
+    create: { phone: req.params.phone, ...data },
+    update: data,
+  });
+  res.json(member);
+});
+
 // PATCH /api/members/:phone/points — counter manually adjusts points (admin).
 // Body: { delta } to add/subtract, or { set } to set absolute value.
 router.patch('/:phone/points', requireAuth, async (req, res) => {

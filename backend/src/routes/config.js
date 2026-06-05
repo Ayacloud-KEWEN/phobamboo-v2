@@ -29,6 +29,7 @@ router.put('/', requireAuth, requireOwner, async (req, res) => {
   }
   if (b.pointsPerEuro !== undefined) data.pointsPerEuro = Number(b.pointsPerEuro) || 0;
   if (b.pointsThreshold !== undefined) data.pointsThreshold = Number(b.pointsThreshold) || 0;
+  if (b.comboPrice !== undefined) data.comboPrice = Number(b.comboPrice) || 0;
   if (b.kdsEnabled !== undefined) data.kdsEnabled = !!b.kdsEnabled;
 
   const config = await prisma.restaurantConfig.upsert({

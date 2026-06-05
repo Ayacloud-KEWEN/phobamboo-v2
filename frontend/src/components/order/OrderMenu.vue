@@ -4,7 +4,7 @@
       <!-- Sub-category header -->
       <div v-if="group.key !== 'General'" class="mt-5 mb-2 px-2 flex items-center fade-in">
         <div class="h-4 w-1 bg-green-600 rounded-full mr-2"></div>
-        <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">{{ group.key }}</h3>
+        <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">{{ clean(group.key) }}</h3>
         <div class="ml-3 h-px bg-gray-200 flex-1"></div>
       </div>
 
@@ -45,6 +45,7 @@ const cart = useCartStore();
 
 const GROUPED = ['menus', 'plats', 'boissons', 'alcool'];
 const isDrink = computed(() => props.category === 'boissons' || props.category === 'alcool');
+const clean = (k) => k.replace(/^\s*\d+\s*[-.)]?\s*/, '');
 
 const groups = computed(() => {
   const items = menu.byCategory(props.category);

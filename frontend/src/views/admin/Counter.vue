@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-white">
     <AdminNav />
+    <audio ref="alertAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div class="px-4 py-4">
       <!-- Tabs + pending total -->
@@ -21,9 +22,18 @@
             <i class="fas fa-users mr-2"></i>Fidélité
           </button>
         </div>
-        <div v-if="tab === 'orders'" class="text-right">
-          <p class="text-xs text-slate-400">En attente</p>
-          <p class="text-2xl font-bold text-green-400">{{ pendingTotal.toFixed(2) }}€</p>
+        <div v-if="tab === 'orders'" class="flex items-center gap-3">
+          <button
+            @click="toggleSound"
+            class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700"
+            :title="soundOn ? 'Son activé' : 'Son coupé'"
+          >
+            <i :class="soundOn ? 'fas fa-volume-high' : 'fas fa-volume-xmark text-slate-500'"></i>
+          </button>
+          <div class="text-right">
+            <p class="text-xs text-slate-400">En attente</p>
+            <p class="text-2xl font-bold text-green-400">{{ pendingTotal.toFixed(2) }}€</p>
+          </div>
         </div>
       </div>
 
@@ -39,12 +49,17 @@
             v-for="o in orders"
             :key="o.id"
             class="bg-slate-800 rounded-xl border-2 overflow-hidden flex flex-col transition"
-            :class="o.status === 'completed' ? 'border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-slate-700'"
+            :class="isLate(o) ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.25)]' : o.status === 'completed' ? 'border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-slate-700'"
           >
             <div class="p-4 bg-slate-900/50 border-b border-slate-700 flex justify-between items-start">
               <div>
-                <div class="text-3xl font-black">{{ o.table || '—' }}</div>
-                <div class="text-xs text-slate-400 font-mono">{{ time(o.createdAt) }}</div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-xs font-bold text-blue-300">#{{ o.dailyNumber || '–' }}</span>
+                  <span class="text-3xl font-black">{{ o.table || '—' }}</span>
+                </div>
+                <div class="text-xs font-mono mt-0.5" :class="isLate(o) ? 'text-red-400 font-bold' : 'text-slate-400'">
+                  {{ time(o.createdAt) }} · {{ elapsedMin(o) }} min
+                </div>
               </div>
               <div class="flex items-start gap-2">
                 <div class="flex flex-col items-end gap-1.5">
@@ -78,7 +93,12 @@
                 <span class="text-slate-400 text-sm">Total</span>
                 <span class="text-3xl font-bold">{{ o.total.toFixed(2) }}€</span>
               </div>
-              <div class="grid grid-cols-4 gap-2">
+              <div class="grid grid-cols-5 gap-2">
+                <button
+                  @click="printTicket(o)"
+                  class="col-span-1 bg-slate-700 hover:bg-slate-600 rounded-lg py-3"
+                  title="Imprimer le ticket"
+                ><i class="fas fa-print"></i></button>
                 <button
                   v-if="o.status === 'pending'"
                   @click="setStatus(o, 'completed')"
@@ -91,8 +111,8 @@
                   class="bg-blue-600 hover:bg-blue-500 font-bold rounded-lg py-3 shadow-lg active:scale-95 transition disabled:opacity-50"
                   :class="o.status === 'pending' ? 'col-span-3' : 'col-span-4'"
                 >
-                  <i class="fas fa-check mr-2"></i>ENCAISSÉ
-                  <span v-if="o.phone && o.pointsToEarn" class="text-xs opacity-80">(+{{ o.pointsToEarn }}pts)</span>
+                  <i class="fas fa-check mr-1"></i>ENCAISSÉ
+                  <span v-if="o.phone && o.pointsToEarn" class="text-xs opacity-80">(+{{ o.pointsToEarn }})</span>
                 </button>
               </div>
             </div>
@@ -118,10 +138,21 @@
           <div v-if="memberBusy" class="text-center py-4 text-slate-500"><i class="fas fa-spinner fa-spin mr-2"></i>Recherche...</div>
 
           <div v-else-if="member">
-            <div class="bg-slate-700/50 rounded-xl p-6 text-center mb-6 border border-slate-600">
+            <div class="bg-slate-700/50 rounded-xl p-6 text-center mb-4 border border-slate-600">
               <p class="text-sm text-slate-400 uppercase tracking-wide mb-1">{{ member.phone }} — Solde</p>
               <div class="text-5xl font-black text-yellow-400">{{ member.points }} <span class="text-xl">pts</span></div>
+              <div v-if="memberHistory" class="mt-3 text-xs text-slate-400 flex justify-center gap-4">
+                <span><i class="fas fa-store mr-1"></i>{{ memberHistory.visits }} visites</span>
+                <span><i class="fas fa-euro-sign mr-1"></i>{{ memberHistory.lifetimeSpend.toFixed(2) }}€ cumulés</span>
+              </div>
             </div>
+
+            <!-- Name -->
+            <div class="flex gap-2 mb-4">
+              <input v-model="nameInput" placeholder="Nom du client (optionnel)" class="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+              <button @click="saveName" class="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg text-sm font-bold">Nom</button>
+            </div>
+
             <h3 class="text-sm font-bold text-slate-400 mb-2">Modification rapide</h3>
             <div class="grid grid-cols-2 gap-3 mb-4">
               <button @click="adjust(100)" class="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg font-bold border border-slate-600">+100</button>
@@ -134,6 +165,17 @@
               <div class="flex gap-2">
                 <input v-model.number="customDelta" type="number" placeholder="+ / -" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
                 <button @click="adjust(customDelta)" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold">VALIDER</button>
+              </div>
+            </div>
+
+            <!-- Order history -->
+            <div v-if="memberHistory && memberHistory.orders.length" class="mt-5">
+              <h3 class="text-sm font-bold text-slate-400 mb-2">Dernières commandes</h3>
+              <div class="space-y-1 max-h-52 overflow-y-auto">
+                <div v-for="h in memberHistory.orders" :key="h.id" class="flex justify-between text-sm bg-slate-900/60 rounded-lg px-3 py-2">
+                  <span class="text-slate-400">{{ dayLabel(h.paidAt) }}</span>
+                  <span class="font-bold">{{ h.total.toFixed(2) }}€</span>
+                </div>
               </div>
             </div>
           </div>
@@ -151,7 +193,11 @@ import api from '../../api/client';
 import { joinRoom, getSocket } from '../../api/socket';
 import { toast } from '../../composables/toast';
 import { confirmDialog } from '../../composables/confirm';
+import { printReceipt } from '../../composables/printReceipt';
+import { useConfigStore } from '../../stores/config';
 import AdminNav from '../../components/AdminNav.vue';
+
+const cfg = useConfigStore();
 
 const tab = ref('orders');
 const orders = ref([]);
@@ -163,6 +209,30 @@ const pendingTotal = computed(() =>
 
 function time(iso) {
   return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Ticking clock for order aging (updated every 30s).
+const now = ref(Date.now());
+let clockTimer = null;
+const elapsedMin = (o) => Math.floor((now.value - new Date(o.createdAt).getTime()) / 60000);
+const isLate = (o) => o.status === 'pending' && elapsedMin(o) >= 15;
+
+// New-order sound + mute toggle.
+const soundOn = ref(true);
+const alertAudio = ref(null);
+function playSound() {
+  if (soundOn.value && alertAudio.value) alertAudio.value.play().catch(() => {});
+}
+function toggleSound() {
+  soundOn.value = !soundOn.value;
+  // Unlock audio on this user gesture so later auto-play works.
+  if (soundOn.value && alertAudio.value) {
+    alertAudio.value.play().then(() => { alertAudio.value.pause(); alertAudio.value.currentTime = 0; }).catch(() => {});
+  }
+}
+
+function printTicket(o) {
+  printReceipt(o, cfg.name);
 }
 
 async function load() {
@@ -228,6 +298,8 @@ const member = ref(null);
 const memberBusy = ref(false);
 const searched = ref(false);
 const customDelta = ref(0);
+const memberHistory = ref(null); // { orders, visits, lifetimeSpend }
+const nameInput = ref('');
 
 async function search() {
   const phone = searchPhone.value.replace(/\s+/g, '');
@@ -235,15 +307,40 @@ async function search() {
   memberBusy.value = true;
   searched.value = true;
   member.value = null;
+  memberHistory.value = null;
   try {
     const { data } = await api.get(`/api/members/${encodeURIComponent(phone)}`);
     member.value = data;
+    nameInput.value = data.name || '';
+    loadHistory(data.phone);
   } catch {
     member.value = null;
   } finally {
     memberBusy.value = false;
   }
 }
+
+async function loadHistory(phone) {
+  try {
+    const { data } = await api.get(`/api/members/${encodeURIComponent(phone)}/orders`);
+    memberHistory.value = data;
+  } catch {
+    memberHistory.value = null;
+  }
+}
+
+async function saveName() {
+  if (!member.value) return;
+  try {
+    const { data } = await api.patch(`/api/members/${encodeURIComponent(member.value.phone)}`, { name: nameInput.value });
+    member.value = { ...member.value, name: data.name };
+    toast('Nom enregistré', 'success');
+  } catch {
+    toast('Erreur', 'error');
+  }
+}
+
+const dayLabel = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
 
 async function adjust(delta) {
   if (!member.value || !delta) return;
@@ -261,7 +358,8 @@ async function adjust(delta) {
 let socket = null;
 function onNew(o) {
   upsert(o);
-  toast(`Nouvelle commande ${o.table ? '· ' + o.table : ''}`, 'info');
+  playSound();
+  toast(`Nouvelle commande #${o.dailyNumber || ''} ${o.table ? '· ' + o.table : ''}`, 'info');
 }
 function onUpdate(o) {
   upsert(o);
@@ -272,6 +370,7 @@ function onMember(m) {
 
 onMounted(() => {
   load();
+  clockTimer = setInterval(() => (now.value = Date.now()), 30000);
   socket = joinRoom('counter');
   socket.on('order:new', onNew);
   socket.on('order:update', onUpdate);
@@ -279,6 +378,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearInterval(clockTimer);
   const s = getSocket();
   s.off('order:new', onNew);
   s.off('order:update', onUpdate);

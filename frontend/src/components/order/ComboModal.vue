@@ -45,7 +45,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { localizedName } from '../../i18n';
-import { COMBO_PRICE_ADDITION } from '../../stores/cart';
+import { useConfigStore } from '../../stores/config';
 
 const props = defineProps({
   product: { type: Object, required: true },
@@ -54,12 +54,13 @@ const props = defineProps({
 const emit = defineEmits(['close', 'confirm']);
 
 const { t } = useI18n();
+const cfg = useConfigStore();
 const withCombo = ref(false);
 const selectedEntree = ref(props.entrees[0]?.id || null);
 
 const name = computed(() => localizedName(props.product));
 const eName = (e) => localizedName(e);
-const finalPrice = computed(() => props.product.price + (withCombo.value ? COMBO_PRICE_ADDITION : 0));
+const finalPrice = computed(() => props.product.price + (withCombo.value ? (cfg.comboPrice ?? 3.8) : 0));
 
 function confirm() {
   const entree = withCombo.value ? props.entrees.find((e) => e.id === selectedEntree.value) : null;

@@ -5,9 +5,11 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
+import jwt from 'jsonwebtoken';
 import { Server as SocketServer } from 'socket.io';
 
 import { setIO } from './lib/realtime.js';
+import { loginLimiter } from './middleware/rateLimit.js';
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import rewardRoutes from './routes/rewards.js';
@@ -21,6 +23,10 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const ORIGINS = (process.env.CORS_ORIGINS || '*').split(',').map((s) => s.trim());
 const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || './uploads');
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+
+// Trust the first proxy hop (CloudPanel/Nginx) so req.ip is the real client IP.
+app.set('trust proxy', 1);
 
 app.use(cors({ origin: ORIGINS.includes('*') ? true : ORIGINS }));
 app.use(express.json({ limit: '2mb' }));
@@ -45,6 +51,7 @@ const wrapAsync = (router) => {
   }
   return router;
 };
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', wrapAsync(authRoutes));
 app.use('/api/products', wrapAsync(productRoutes));
 app.use('/api/rewards', wrapAsync(rewardRoutes));
@@ -91,8 +98,20 @@ const io = new SocketServer(server, {
 });
 setIO(io);
 
+// Only authenticated admins may connect — order events contain customer phone
+// numbers, so the counter/kds rooms must not be public.
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('unauthorized'));
+  try {
+    socket.admin = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    next(new Error('unauthorized'));
+  }
+});
+
 io.on('connection', (socket) => {
-  // Frontend joins "counter" or "kds" to receive order events.
   socket.on('join', (room) => {
     if (room === 'counter' || room === 'kds') socket.join(room);
   });

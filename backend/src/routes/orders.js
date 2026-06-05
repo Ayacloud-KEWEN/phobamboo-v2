@@ -12,47 +12,97 @@ function startOfToday() {
 }
 
 // POST /api/orders — customer places an order (public).
-// If member spends points, deduct them atomically here.
+//
+// SECURITY: prices, total and points are recomputed server-side from the
+// product/reward catalog. The client only sends *what* was ordered (ids +
+// quantities), never amounts — so totals/points can't be tampered with.
+//
+// Body: { table, phone, notes, lines: [
+//   { kind: 'product', productId, comboEntreeId?, quantity },
+//   { kind: 'reward',  rewardId, quantity }
+// ] }
+const pickName = (o) => o?.nameFr || o?.nameEn || o?.nameZh || '';
+
 router.post('/', async (req, res) => {
   const b = req.body || {};
   const phone = b.phone ? String(b.phone) : '';
-  const items = Array.isArray(b.items) ? b.items : [];
-  const total = Number(b.total) || 0;
-  const pointsToEarn = Number(b.pointsToEarn) || 0;
-  const pointsSpent = Number(b.pointsSpent) || 0;
+  const lines = Array.isArray(b.lines) ? b.lines : [];
+  if (!lines.length) return res.status(400).json({ error: 'EMPTY_ORDER' });
 
   try {
-    const order = await prisma.$transaction(async (tx) => {
-      if (phone && pointsSpent > 0) {
-        const member = await tx.member.findUnique({ where: { phone } });
-        if (!member || member.points < pointsSpent) {
-          throw new Error('INSUFFICIENT_POINTS');
+    const result = await prisma.$transaction(async (tx) => {
+      const cfg = await tx.restaurantConfig.findUnique({ where: { id: 1 } });
+      const comboPrice = cfg?.comboPrice ?? 3.8;
+      const threshold = cfg?.pointsThreshold ?? 20;
+      const rate = cfg?.pointsPerEuro ?? 1;
+
+      const items = [];
+      let total = 0;
+      let pointsSpent = 0;
+
+      for (const line of lines) {
+        const qty = Math.max(1, parseInt(line.quantity) || 1);
+
+        if (line.kind === 'reward') {
+          const reward = await tx.reward.findUnique({ where: { id: String(line.rewardId) } });
+          if (!reward || !reward.active) throw new Error('INVALID_REWARD');
+          pointsSpent += reward.cost * qty;
+          items.push({ name: `🎁 ${pickName(reward)}`, quantity: qty, price: 0, pointsCost: reward.cost });
+          continue;
         }
-        await tx.member.update({
-          where: { phone },
-          data: { points: { decrement: pointsSpent } },
-        });
+
+        const product = await tx.product.findUnique({ where: { id: String(line.productId) } });
+        if (!product || !product.available) throw new Error('INVALID_PRODUCT');
+
+        let price = product.price;
+        let name = pickName(product);
+        if (line.comboEntreeId) {
+          const opts = Array.isArray(product.comboOptions) ? product.comboOptions.map(String) : [];
+          if (!opts.includes(String(line.comboEntreeId))) throw new Error('INVALID_COMBO');
+          const entree = await tx.product.findUnique({ where: { id: String(line.comboEntreeId) } });
+          if (!entree) throw new Error('INVALID_COMBO');
+          price += comboPrice;
+          name += ` (+ ${pickName(entree)})`;
+        }
+        price = Number(price.toFixed(2));
+        total += price * qty;
+        items.push({ name, quantity: qty, price });
       }
+
+      total = Number(total.toFixed(2));
+      const pointsToEarn = total < threshold ? 0 : Math.floor(total * rate);
+
+      // Deduct spent points atomically (members only).
+      if (pointsSpent > 0) {
+        if (!phone) throw new Error('LOGIN_REQUIRED');
+        const member = await tx.member.findUnique({ where: { phone } });
+        if (!member || member.points < pointsSpent) throw new Error('INSUFFICIENT_POINTS');
+        await tx.member.update({ where: { phone }, data: { points: { decrement: pointsSpent } } });
+      }
+
+      // Per-day sequence number.
+      const todayCount = await tx.order.count({ where: { createdAt: { gte: startOfToday() } } });
+
       return tx.order.create({
         data: {
+          dailyNumber: todayCount + 1,
           table: String(b.table ?? ''),
           phone,
           items,
           total,
           notes: String(b.notes ?? ''),
           status: 'pending',
-          pointsToEarn,
+          pointsToEarn: phone ? pointsToEarn : 0,
           pointsSpent,
         },
       });
     });
 
-    emitOrderNew(order);
-    res.status(201).json(order);
+    emitOrderNew(result);
+    res.status(201).json(result);
   } catch (e) {
-    if (e.message === 'INSUFFICIENT_POINTS') {
-      return res.status(400).json({ error: 'INSUFFICIENT_POINTS' });
-    }
+    const known = ['INSUFFICIENT_POINTS', 'INVALID_PRODUCT', 'INVALID_REWARD', 'INVALID_COMBO', 'LOGIN_REQUIRED', 'EMPTY_ORDER'];
+    if (known.includes(e.message)) return res.status(400).json({ error: e.message });
     console.error('Create order error:', e);
     res.status(500).json({ error: 'Failed to create order' });
   }
