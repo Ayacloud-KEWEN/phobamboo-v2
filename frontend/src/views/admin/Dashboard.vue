@@ -94,7 +94,7 @@
         <!-- Owner-only panels -->
         <template v-if="auth.isOwner">
           <SettingsPanel />
-          <SmsPanel />
+          <SmsContactsPanel />
         </template>
       </template>
     </div>
@@ -109,7 +109,7 @@ import { toast } from '../../composables/toast';
 import AdminNav from '../../components/AdminNav.vue';
 import StatCard from '../../components/StatCard.vue';
 import SettingsPanel from '../../components/admin/SettingsPanel.vue';
-import SmsPanel from '../../components/admin/SmsPanel.vue';
+import SmsContactsPanel from '../../components/admin/SmsContactsPanel.vue';
 
 const auth = useAuthStore();
 

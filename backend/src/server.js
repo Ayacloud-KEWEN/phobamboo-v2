@@ -18,7 +18,6 @@ import memberRoutes from './routes/members.js';
 import configRoutes from './routes/config.js';
 import uploadRoutes from './routes/upload.js';
 import statsRoutes from './routes/stats.js';
-import marketingRoutes from './routes/marketing.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -67,7 +66,6 @@ app.use('/api/members', wrapAsync(memberRoutes));
 app.use('/api/config', wrapAsync(configRoutes));
 app.use('/api/upload', wrapAsync(uploadRoutes));
 app.use('/api/stats', wrapAsync(statsRoutes));
-app.use('/api/marketing', wrapAsync(marketingRoutes));
 
 // --- Serve the built frontend (single-port deploy) ---
 // Set FRONTEND_DIR to the Vite build output. When present, the backend serves
