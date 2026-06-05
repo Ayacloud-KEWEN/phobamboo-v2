@@ -8,14 +8,18 @@ const router = Router();
 router.get('/summary', requireAuth, async (req, res) => {
   const [memberCount, paidOrders, memberAgg] = await Promise.all([
     prisma.member.count(),
-    prisma.order.findMany({ where: { status: 'paid' }, select: { total: true } }),
+    prisma.order.findMany({ where: { status: 'paid' }, select: { total: true, paymentMethod: true } }),
     prisma.member.aggregate({ _sum: { points: true } }),
   ]);
   const revenue = paidOrders.reduce((s, o) => s + o.total, 0);
+  const cashRevenue = paidOrders.filter((o) => o.paymentMethod === 'cash').reduce((s, o) => s + o.total, 0);
+  const cardRevenue = paidOrders.filter((o) => o.paymentMethod === 'card').reduce((s, o) => s + o.total, 0);
   res.json({
     memberCount,
     paidOrderCount: paidOrders.length,
     revenue: Number(revenue.toFixed(2)),
+    cashRevenue: Number(cashRevenue.toFixed(2)),
+    cardRevenue: Number(cardRevenue.toFixed(2)),
     totalPoints: memberAgg._sum.points || 0,
   });
 });
@@ -80,7 +84,8 @@ router.get('/export', requireAuth, async (req, res) => {
     orderBy: { paidAt: 'asc' },
   });
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const head = ['Date', 'N°', 'Table', 'Téléphone', 'Total', 'Points', 'Articles'];
+  const methodLabel = { cash: 'Espèces', card: 'Carte' };
+  const head = ['Date', 'N°', 'Table', 'Téléphone', 'Paiement', 'Total', 'Points', 'Articles'];
   const rows = orders.map((o) => {
     const items = (Array.isArray(o.items) ? o.items : []).map((i) => `${i.quantity}x ${i.name}`).join(' | ');
     return [
@@ -88,6 +93,7 @@ router.get('/export', requireAuth, async (req, res) => {
       o.dailyNumber || '',
       o.table || '',
       o.phone || '',
+      methodLabel[o.paymentMethod] || '',
       o.total.toFixed(2),
       o.pointsAwarded || 0,
       items,

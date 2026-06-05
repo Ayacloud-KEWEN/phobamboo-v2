@@ -172,9 +172,12 @@
             <div v-if="memberHistory && memberHistory.orders.length" class="mt-5">
               <h3 class="text-sm font-bold text-slate-400 mb-2">Dernières commandes</h3>
               <div class="space-y-1 max-h-52 overflow-y-auto">
-                <div v-for="h in memberHistory.orders" :key="h.id" class="flex justify-between text-sm bg-slate-900/60 rounded-lg px-3 py-2">
-                  <span class="text-slate-400">{{ dayLabel(h.paidAt) }}</span>
-                  <span class="font-bold">{{ h.total.toFixed(2) }}€</span>
+                <div v-for="h in memberHistory.orders" :key="h.id" class="flex items-center justify-between text-sm bg-slate-900/60 rounded-lg px-3 py-2">
+                  <span class="text-slate-400">{{ dayLabel(h.paidAt) }} <span v-if="h.dailyNumber" class="text-slate-600">#{{ h.dailyNumber }}</span></span>
+                  <div class="flex items-center gap-3">
+                    <span class="font-bold">{{ h.total.toFixed(2) }}€</span>
+                    <button @click="refundOrder(h)" class="text-slate-500 hover:text-red-400" title="Rembourser"><i class="fas fa-rotate-left"></i></button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -182,6 +185,23 @@
 
           <p v-else-if="searched" class="text-center text-slate-500 py-4">Aucun membre trouvé pour ce numéro.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Payment method picker -->
+    <div v-if="payTarget" class="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4" @click.self="payTarget = null">
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-6 text-center">
+        <p class="text-slate-400 text-sm">Encaisser</p>
+        <p class="text-4xl font-black mb-5">{{ payTarget.total.toFixed(2) }}€</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button @click="doPay('cash')" class="bg-emerald-600 hover:bg-emerald-500 rounded-xl py-5 font-bold text-lg active:scale-95 transition">
+            <i class="fas fa-money-bill-wave block text-2xl mb-1"></i>Espèces
+          </button>
+          <button @click="doPay('card')" class="bg-blue-600 hover:bg-blue-500 rounded-xl py-5 font-bold text-lg active:scale-95 transition">
+            <i class="fas fa-credit-card block text-2xl mb-1"></i>Carte
+          </button>
+        </div>
+        <button @click="payTarget = null" class="mt-4 text-sm text-slate-400 hover:text-white">Annuler</button>
       </div>
     </div>
   </div>
@@ -256,18 +276,42 @@ function upsert(order) {
   else orders.value.unshift(order);
 }
 
-async function pay(o) {
-  const ok = await confirmDialog({ title: 'Encaissement', message: `Encaisser ${o.total.toFixed(2)}€ ?`, confirmText: 'Encaisser' });
-  if (!ok) return;
+// Payment: pick a method (cash/card) before confirming.
+const payTarget = ref(null);
+function pay(o) {
+  payTarget.value = o;
+}
+async function doPay(method) {
+  const o = payTarget.value;
+  payTarget.value = null;
+  if (!o) return;
   o._busy = true;
   try {
-    const { data } = await api.post(`/api/orders/${o.id}/pay`);
+    const { data } = await api.post(`/api/orders/${o.id}/pay`, { method });
     orders.value = orders.value.filter((x) => x.id !== o.id);
     const awarded = data.order?.pointsAwarded || 0;
     if (data.member) toast(`+${awarded} pts → ${data.member.points} pts`, 'success');
     else toast('Encaissé', 'success');
   } catch (e) {
     o._busy = false;
+    toast(e?.response?.data?.error || 'Erreur', 'error');
+  }
+}
+
+async function refundOrder(h) {
+  const ok = await confirmDialog({
+    title: 'Rembourser',
+    message: `Commande #${h.dailyNumber || ''} · ${h.total.toFixed(2)}€\nLes points liés seront annulés.`,
+    danger: true,
+    confirmText: 'Rembourser',
+  });
+  if (!ok) return;
+  try {
+    const { data } = await api.post(`/api/orders/${h.id}/refund`);
+    if (data.member) member.value = data.member;
+    if (member.value) loadHistory(member.value.phone);
+    toast('Remboursé', 'success');
+  } catch (e) {
     toast(e?.response?.data?.error || 'Erreur', 'error');
   }
 }

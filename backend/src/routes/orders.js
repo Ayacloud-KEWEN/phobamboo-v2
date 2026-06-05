@@ -142,6 +142,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
 //   - This order awards the difference vs. what earlier same-day paid orders
 //     already granted (tracked via Order.pointsAwarded), never negative.
 router.post('/:id/pay', requireAuth, async (req, res) => {
+  const method = ['cash', 'card'].includes(req.body.method) ? req.body.method : '';
   try {
     const { order, member } = await prisma.$transaction(async (tx) => {
       const existing = await tx.order.findUnique({ where: { id: req.params.id } });
@@ -169,7 +170,7 @@ router.post('/:id/pay', requireAuth, async (req, res) => {
 
       const order = await tx.order.update({
         where: { id: req.params.id },
-        data: { status: 'paid', paidAt: new Date(), pointsAwarded: pointsToAdd },
+        data: { status: 'paid', paidAt: new Date(), pointsAwarded: pointsToAdd, paymentMethod: method },
       });
 
       let member = null;
@@ -194,6 +195,43 @@ router.post('/:id/pay', requireAuth, async (req, res) => {
     if (e.message === 'ALREADY_PAID') return res.status(409).json({ error: 'Already paid' });
     console.error('Pay order error:', e);
     res.status(500).json({ error: 'Failed to pay order' });
+  }
+});
+
+// POST /api/orders/:id/refund — reverse a paid order (admin).
+// Removes the points it earned and gives back any points spent on it.
+router.post('/:id/refund', requireAuth, async (req, res) => {
+  try {
+    const { order, member } = await prisma.$transaction(async (tx) => {
+      const existing = await tx.order.findUnique({ where: { id: req.params.id } });
+      if (!existing) throw new Error('NOT_FOUND');
+      if (existing.status !== 'paid') throw new Error('NOT_REFUNDABLE');
+
+      const order = await tx.order.update({
+        where: { id: req.params.id },
+        data: { status: 'refunded', refundedAt: new Date() },
+      });
+
+      let member = null;
+      if (existing.phone) {
+        const delta = (existing.pointsSpent || 0) - (existing.pointsAwarded || 0);
+        member = await tx.member.findUnique({ where: { phone: existing.phone } });
+        if (member) {
+          const newPoints = Math.max(0, member.points + delta);
+          member = await tx.member.update({ where: { phone: existing.phone }, data: { points: newPoints } });
+        }
+      }
+      return { order, member };
+    });
+
+    emitOrderUpdate(order);
+    if (member) emitMemberUpdate(member);
+    res.json({ order, member });
+  } catch (e) {
+    if (e.message === 'NOT_FOUND') return res.status(404).json({ error: 'Order not found' });
+    if (e.message === 'NOT_REFUNDABLE') return res.status(409).json({ error: 'Order is not paid' });
+    console.error('Refund error:', e);
+    res.status(500).json({ error: 'Failed to refund' });
   }
 });
 

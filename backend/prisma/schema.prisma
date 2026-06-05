@@ -58,6 +58,7 @@ enum OrderStatus {
   completed // food delivered / ready
   paid // customer paid, points credited
   cancelled
+  refunded // was paid, then refunded (points reversed)
 }
 
 model Order {
@@ -72,8 +73,10 @@ model Order {
   pointsToEarn  Int         @default(0) // estimate shown to customer at order time
   pointsAwarded Int         @default(0) // points actually credited at payment
   pointsSpent   Int         @default(0)
+  paymentMethod String      @default("") // "cash" | "card" (set at payment)
   createdAt     DateTime    @default(now())
   paidAt        DateTime?
+  refundedAt    DateTime?
 
   // phone is a soft reference to Member.phone (empty = guest). No FK so guest
   // orders with empty phone are allowed; counter looks up members separately.

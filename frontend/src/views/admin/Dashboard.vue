@@ -18,6 +18,16 @@
           <StatCard icon="fa-star" color="text-yellow-400" label="Points en circulation" :value="summary.totalPoints" />
         </div>
 
+        <!-- Payment split -->
+        <div class="flex flex-wrap gap-3 mb-8 text-sm">
+          <span class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+            <i class="fas fa-money-bill-wave text-emerald-400 mr-2"></i>Espèces <b>{{ (summary.cashRevenue || 0).toFixed(2) }}€</b>
+          </span>
+          <span class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+            <i class="fas fa-credit-card text-blue-400 mr-2"></i>Carte <b>{{ (summary.cardRevenue || 0).toFixed(2) }}€</b>
+          </span>
+        </div>
+
         <!-- Daily revenue -->
         <div class="bg-slate-800 rounded-2xl border border-slate-700 p-5 mb-8">
           <div class="flex items-center justify-between mb-4">
@@ -78,8 +88,11 @@
           </table>
         </div>
 
-        <!-- Owner-only settings (KDS toggle, points rule) -->
-        <SettingsPanel v-if="auth.isOwner" />
+        <!-- Owner-only panels -->
+        <template v-if="auth.isOwner">
+          <SettingsPanel />
+          <SmsPanel />
+        </template>
       </template>
     </div>
   </div>
@@ -93,6 +106,7 @@ import { toast } from '../../composables/toast';
 import AdminNav from '../../components/AdminNav.vue';
 import StatCard from '../../components/StatCard.vue';
 import SettingsPanel from '../../components/admin/SettingsPanel.vue';
+import SmsPanel from '../../components/admin/SmsPanel.vue';
 
 const auth = useAuthStore();
 
