@@ -21,8 +21,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import { useConfigStore } from '../../stores/config';
+import { applyAdminManifest } from '../../composables/useAdminPwa';
+
+onMounted(applyAdminManifest);
 
 const router = useRouter();
 const route = useRoute();

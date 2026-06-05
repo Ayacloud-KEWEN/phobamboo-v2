@@ -28,13 +28,18 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useConfigStore } from '../stores/config';
+import { applyAdminManifest } from '../composables/useAdminPwa';
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const cfg = useConfigStore();
+
+// Make "Add to Home Screen" from any back-office page open the Comptoir.
+onMounted(applyAdminManifest);
 
 const links = computed(() => {
   const base = [
