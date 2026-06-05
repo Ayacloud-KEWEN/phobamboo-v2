@@ -32,8 +32,11 @@ mkdir -p "$BACKUP_DIR"
 STAMP="$(date +%F_%H%M)"
 OUT="$BACKUP_DIR/phobamboo_$STAMP.sql.gz"
 
+# pg_dump (libpq) ne comprend pas le paramètre "?schema=..." de Prisma — on l'enlève.
+DB_URL_CLEAN="${DATABASE_URL%%\?*}"
+
 echo "备份到 $OUT ..."
-pg_dump "$DATABASE_URL" | gzip > "$OUT"
+pg_dump "$DB_URL_CLEAN" | gzip > "$OUT"
 echo "✅ 完成：$(du -h "$OUT" | cut -f1)"
 
 # 删除超过 KEEP_DAYS 天的旧备份
