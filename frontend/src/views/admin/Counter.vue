@@ -60,11 +60,12 @@
           >
             <div class="p-4 bg-slate-900/50 border-b border-slate-700 flex justify-between items-start">
               <div>
-                <div class="flex items-baseline gap-2">
-                  <span class="text-xs font-bold text-blue-300">#{{ o.dailyNumber || '–' }}</span>
-                  <span class="text-3xl font-black">{{ o.table || '—' }}</span>
+                <span class="text-xs font-bold text-blue-300 bg-blue-500/10 px-1.5 py-0.5 rounded">N°{{ o.dailyNumber || '–' }}</span>
+                <div class="mt-1 leading-none">
+                  <span v-if="o.table" class="text-5xl font-black">{{ o.table }}</span>
+                  <span v-else class="text-xl font-bold text-blue-300"><i class="fas fa-bag-shopping mr-1"></i>À emporter</span>
                 </div>
-                <div class="text-xs font-mono mt-0.5" :class="isLate(o) ? 'text-red-400 font-bold' : 'text-slate-400'">
+                <div class="text-xs font-mono mt-1.5" :class="isLate(o) ? 'text-red-400 font-bold' : 'text-slate-400'">
                   {{ time(o.createdAt) }} · {{ elapsedMin(o) }} min
                 </div>
               </div>
