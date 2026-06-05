@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100">
     <AdminNav />
-    <ToastHost />
 
     <div class="max-w-5xl mx-auto px-4 py-5">
       <!-- Tabs -->
@@ -97,7 +96,6 @@ import { CATEGORY_ORDER } from '../../stores/menu';
 import { toast } from '../../composables/toast';
 import { confirmDialog } from '../../composables/confirm';
 import AdminNav from '../../components/AdminNav.vue';
-import ToastHost from '../../components/ToastHost.vue';
 import ProductModal from '../../components/admin/ProductModal.vue';
 import RewardModal from '../../components/admin/RewardModal.vue';
 

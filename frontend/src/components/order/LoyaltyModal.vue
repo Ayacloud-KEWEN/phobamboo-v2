@@ -75,6 +75,8 @@ import { useMenuStore } from '../../stores/menu';
 import { useMemberStore } from '../../stores/member';
 import { useCartStore } from '../../stores/cart';
 import { localizedName } from '../../i18n';
+import { toast } from '../../composables/toast';
+import { confirmDialog } from '../../composables/confirm';
 
 const emit = defineEmits(['close', 'logout']);
 const { t } = useI18n();
@@ -88,16 +90,20 @@ const nextReward = computed(() => sortedRewards.value.find((r) => r.cost > membe
 const nextLabel = computed(() => (nextReward.value ? `${nextReward.value.cost} ${t('loyalty.points')}` : t('loyalty.maxLevel')));
 const progress = computed(() => (nextReward.value ? Math.min((member.points / nextReward.value.cost) * 100, 100) : 100));
 
-function redeem(r) {
+async function redeem(r) {
   const inCart = cart.pointsToSpend;
   if (member.points < r.cost + inCart) {
-    alert(`${t('loyalty.notEnough')}: ${t('loyalty.notEnoughMsg')}`);
+    toast(`${t('loyalty.notEnough')} — ${t('loyalty.notEnoughMsg')}`, 'error');
     return;
   }
-  if (confirm(t('loyalty.redeemConfirm', { cost: r.cost, name: rName(r) }))) {
-    cart.addReward(r);
-    alert(t('loyalty.redeemed'));
-    emit('close');
-  }
+  const ok = await confirmDialog({
+    title: t('loyalty.redeemTitle'),
+    message: t('loyalty.redeemConfirm', { cost: r.cost, name: rName(r) }),
+    confirmText: t('loyalty.obtain'),
+  });
+  if (!ok) return;
+  cart.addReward(r);
+  toast(t('loyalty.redeemed'), 'success');
+  emit('close');
 }
 </script>

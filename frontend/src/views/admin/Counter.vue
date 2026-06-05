@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-white">
     <AdminNav />
-    <ToastHost />
 
     <div class="px-4 py-4">
       <!-- Tabs + pending total -->
@@ -153,7 +152,6 @@ import { joinRoom, getSocket } from '../../api/socket';
 import { toast } from '../../composables/toast';
 import { confirmDialog } from '../../composables/confirm';
 import AdminNav from '../../components/AdminNav.vue';
-import ToastHost from '../../components/ToastHost.vue';
 
 const tab = ref('orders');
 const orders = ref([]);

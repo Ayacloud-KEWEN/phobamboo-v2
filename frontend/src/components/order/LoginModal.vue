@@ -53,6 +53,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '../../stores/member';
+import { toast } from '../../composables/toast';
 
 const emit = defineEmits(['close', 'success']);
 const { t } = useI18n();
@@ -72,7 +73,7 @@ function normalize(p) {
 async function submit() {
   const clean = normalize(phone.value);
   if (clean.length !== 10 || !clean.startsWith('0')) {
-    alert(`${t('login.invalid')}: ${t('login.invalidMsg')}`);
+    toast(`${t('login.invalid')} — ${t('login.invalidMsg')}`, 'error');
     return;
   }
   busy.value = true;
@@ -81,7 +82,7 @@ async function submit() {
     emit('success');
     emit('close');
   } catch {
-    alert(t('menu.error'));
+    toast(t('menu.error'), 'error');
   } finally {
     busy.value = false;
   }

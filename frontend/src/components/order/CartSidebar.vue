@@ -104,6 +104,8 @@ import { useCartStore } from '../../stores/cart';
 import { useMemberStore } from '../../stores/member';
 import { useConfigStore } from '../../stores/config';
 import { localizedName } from '../../i18n';
+import { toast } from '../../composables/toast';
+import { confirmDialog } from '../../composables/confirm';
 
 const props = defineProps({ open: Boolean });
 const emit = defineEmits(['update:open', 'sent', 'login']);
@@ -132,11 +134,14 @@ async function checkout() {
   if (!cart.items.length) return;
   // Guests: offer to log in before sending (no points otherwise).
   if (!member.loggedIn) {
-    if (confirm(`${t('order.noPointsTitle')}\n${t('order.noPointsMsg')}`)) {
-      await send();
-    } else {
-      emit('login');
-    }
+    const continueGuest = await confirmDialog({
+      title: t('order.noPointsTitle'),
+      message: t('order.noPointsMsg'),
+      confirmText: t('login.guest'),
+      cancelText: t('login.submit'),
+    });
+    if (continueGuest) await send();
+    else emit('login');
     return;
   }
   await send();
@@ -146,12 +151,12 @@ async function send() {
   sending.value = true;
   try {
     await cart.submit();
-    alert(t('order.sent'));
+    toast(t('order.sent'), 'success');
     emit('sent');
     emit('update:open', false);
   } catch (e) {
     const code = e?.response?.data?.error;
-    alert(code === 'INSUFFICIENT_POINTS' ? t('loyalty.notEnoughMsg') : t('menu.error'));
+    toast(code === 'INSUFFICIENT_POINTS' ? t('loyalty.notEnoughMsg') : t('menu.error'), 'error');
   } finally {
     sending.value = false;
   }
