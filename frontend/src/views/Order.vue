@@ -3,16 +3,16 @@
     <!-- Nav -->
     <nav class="bamboo-gradient text-white shadow-lg sticky top-0 z-40">
       <div class="container mx-auto px-4">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-2">
-            <img :src="cfg.logo" alt="logo" class="w-14 h-14 object-contain" />
-            <div>
-              <h1 class="text-xl font-bold">{{ cfg.name }}</h1>
+        <div class="flex justify-between items-center h-16 gap-2">
+          <div class="flex items-center space-x-2 min-w-0">
+            <img :src="cfg.logo" alt="logo" class="w-10 h-10 sm:w-14 sm:h-14 object-contain flex-shrink-0" />
+            <div class="min-w-0">
+              <h1 class="text-base sm:text-xl font-bold truncate">{{ cfg.name }}</h1>
               <p class="text-xs opacity-80 hidden sm:block">PUTEAUX-LA DÉFENSE</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 flex-shrink-0">
             <button @click="editTable" class="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg text-sm hover:bg-white/30 transition">
               <i class="fas fa-table text-xs"></i>
               <span class="font-medium">{{ cart.table ? 'T' + cart.table : '---' }}</span>
