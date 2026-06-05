@@ -42,6 +42,7 @@
         <div v-for="c in codes" :key="c.label" class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center">
           <img :src="c.dataUrl" :alt="c.label" class="w-full max-w-[180px]" />
           <p class="mt-2 font-bold text-gray-800">{{ c.label }}</p>
+          <p class="text-xs text-gray-400">{{ host }}</p>
           <a :href="c.dataUrl" :download="`qr-${c.file}.png`" class="text-xs text-bamboo-secondary mt-1 hover:underline">
             <i class="fas fa-download mr-1"></i>PNG
           </a>
@@ -53,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import QRCode from 'qrcode';
 import { useConfigStore } from '../../stores/config';
 import AdminNav from '../../components/AdminNav.vue';
@@ -68,9 +69,47 @@ const codes = ref([]);
 const busy = ref(false);
 const error = ref('');
 
+const host = computed(() => {
+  try {
+    return new URL(base.value).host;
+  } catch {
+    return base.value.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  }
+});
+
 function orderUrl(table) {
   const root = base.value.replace(/\/+$/, '');
   return table === null ? `${root}/order` : `${root}/order?table=${encodeURIComponent(table)}`;
+}
+
+// Preload the logo once (same origin → canvas stays untainted).
+function loadLogo() {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = cfg.logo;
+  });
+}
+
+// Generate a QR (error-correction H so the centre logo doesn't break scanning)
+// with the restaurant logo drawn in the middle.
+async function makeQr(url, logo) {
+  const size = 600;
+  const canvas = document.createElement('canvas');
+  await QRCode.toCanvas(canvas, url, { width: size, margin: 1, errorCorrectionLevel: 'H' });
+  if (logo) {
+    const ctx = canvas.getContext('2d');
+    const ls = Math.round(size * 0.2);
+    const pos = (size - ls) / 2;
+    const pad = 10;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, ls / 2 + pad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.drawImage(logo, pos, pos, ls, ls);
+  }
+  return canvas.toDataURL('image/png');
 }
 
 async function generate() {
@@ -83,14 +122,13 @@ async function generate() {
   }
   busy.value = true;
   try {
+    const logo = await loadLogo();
     const out = [];
     for (let n = a; n <= b; n++) {
-      const dataUrl = await QRCode.toDataURL(orderUrl(n), { width: 600, margin: 1 });
-      out.push({ label: `Table ${n}`, file: `table-${n}`, dataUrl });
+      out.push({ label: `Table ${n}`, file: `table-${n}`, dataUrl: await makeQr(orderUrl(n), logo) });
     }
     if (includeTakeaway.value) {
-      const dataUrl = await QRCode.toDataURL(orderUrl(null), { width: 600, margin: 1 });
-      out.push({ label: 'À emporter', file: 'emporter', dataUrl });
+      out.push({ label: 'À emporter', file: 'emporter', dataUrl: await makeQr(orderUrl(null), logo) });
     }
     codes.value = out;
   } catch (e) {
@@ -108,6 +146,7 @@ function printAll() {
         <img src="${c.dataUrl}" style="width:220px;height:220px;" />
         <div style="font-size:22px;font-weight:bold;margin-top:8px;">${c.label}</div>
         <div style="font-size:12px;color:#666;margin-top:4px;">Scannez pour commander</div>
+        <div style="font-size:13px;color:#2d5a27;font-weight:bold;margin-top:6px;">${host.value}</div>
       </div>`
     )
     .join('');
