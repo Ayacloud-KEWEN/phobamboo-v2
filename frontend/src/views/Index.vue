@@ -16,8 +16,8 @@
             <button @click="onPrint" class="bg-green-800/40 hover:bg-green-800/60 text-white px-3 py-2 rounded-full transition items-center backdrop-blur-sm border border-white/10 hidden sm:flex">
               <i class="fas fa-print mr-2 text-sm"></i><span class="text-sm font-bold">{{ t('nav.pdf') }}</span>
             </button>
-            <a href="#infos" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full transition items-center backdrop-blur-sm border border-white/10 hidden sm:flex">
-              <i class="fas fa-circle-info mr-2 text-sm"></i><span class="text-sm font-bold">{{ t('nav.infos') }}</span>
+            <a href="#infos" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full transition flex items-center backdrop-blur-sm border border-white/10">
+              <i class="fas fa-circle-info text-sm sm:mr-2"></i><span class="text-sm font-bold hidden sm:inline">{{ t('nav.infos') }}</span>
             </a>
             <a href="tel:0760736465" class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-full transition flex items-center backdrop-blur-sm border border-white/10">
               <i class="fas fa-phone text-sm sm:mr-2"></i><span class="text-sm font-bold hidden sm:inline">{{ t('nav.reserve') }}</span>
