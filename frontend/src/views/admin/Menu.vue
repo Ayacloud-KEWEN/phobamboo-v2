@@ -95,6 +95,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAdminMenuStore } from '../../stores/adminMenu';
 import { CATEGORY_ORDER } from '../../stores/menu';
 import { toast } from '../../composables/toast';
+import { confirmDialog } from '../../composables/confirm';
 import AdminNav from '../../components/AdminNav.vue';
 import ToastHost from '../../components/ToastHost.vue';
 import ProductModal from '../../components/admin/ProductModal.vue';
@@ -132,14 +133,16 @@ async function onSaveProduct(payload) {
   }
 }
 async function onDeleteProduct(id) {
-  if (!confirm('Supprimer ce plat ?')) return;
+  const ok = await confirmDialog({ title: 'Supprimer le plat', message: 'Cette action est irréversible.', danger: true, confirmText: 'Supprimer' });
+  if (!ok) return;
   await store.deleteProduct(id);
   productModal.value = false;
   toast('Supprimé', 'success');
 }
 async function deleteRow(p) {
   const label = p.nameFr || p.nameEn || p.nameZh || 'ce plat';
-  if (!confirm(`Supprimer « ${label} » ? Cette action est irréversible.`)) return;
+  const ok = await confirmDialog({ title: 'Supprimer le plat', message: `« ${label} »\nCette action est irréversible.`, danger: true, confirmText: 'Supprimer' });
+  if (!ok) return;
   try {
     await store.deleteProduct(p.id);
     toast('Supprimé', 'success');
@@ -157,7 +160,8 @@ async function onSaveReward(payload) {
   }
 }
 async function onDeleteReward(id) {
-  if (!confirm('Supprimer ?')) return;
+  const ok = await confirmDialog({ title: 'Supprimer la récompense', message: 'Cette action est irréversible.', danger: true, confirmText: 'Supprimer' });
+  if (!ok) return;
   await store.deleteReward(id);
   rewardModal.value = false;
   toast('Supprimé', 'success');

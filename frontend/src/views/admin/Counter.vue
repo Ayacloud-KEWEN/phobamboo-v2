@@ -151,6 +151,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import api from '../../api/client';
 import { joinRoom, getSocket } from '../../api/socket';
 import { toast } from '../../composables/toast';
+import { confirmDialog } from '../../composables/confirm';
 import AdminNav from '../../components/AdminNav.vue';
 import ToastHost from '../../components/ToastHost.vue';
 
@@ -188,7 +189,8 @@ function upsert(order) {
 }
 
 async function pay(o) {
-  if (!confirm(`Encaisser ${o.total.toFixed(2)}€ ?`)) return;
+  const ok = await confirmDialog({ title: 'Encaissement', message: `Encaisser ${o.total.toFixed(2)}€ ?`, confirmText: 'Encaisser' });
+  if (!ok) return;
   o._busy = true;
   try {
     const { data } = await api.post(`/api/orders/${o.id}/pay`);
@@ -212,7 +214,8 @@ async function setStatus(o, status) {
 }
 
 async function cancel(o) {
-  if (!confirm('Annuler cette commande ?')) return;
+  const ok = await confirmDialog({ title: 'Annuler la commande', message: 'Cette action est irréversible.', danger: true, confirmText: 'Annuler' });
+  if (!ok) return;
   try {
     await api.patch(`/api/orders/${o.id}/status`, { status: 'cancelled' });
     orders.value = orders.value.filter((x) => x.id !== o.id);

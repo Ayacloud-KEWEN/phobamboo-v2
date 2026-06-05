@@ -2,9 +2,11 @@
   <div class="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center" @click.self="$emit('close')">
     <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl">
       <!-- Header -->
-      <div class="bamboo-gradient p-6 text-white relative">
-        <button @click="$emit('logout')" class="absolute top-4 left-4 text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded"><i class="fas fa-sign-out-alt mr-1"></i>{{ t('loyalty.change') }}</button>
-        <button @click="$emit('close')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30"><i class="fas fa-times"></i></button>
+      <div class="bamboo-gradient p-6 text-white">
+        <div class="flex justify-between items-center mb-4">
+          <button @click="$emit('logout')" class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg"><i class="fas fa-sign-out-alt mr-1"></i>{{ t('loyalty.change') }}</button>
+          <button @click="$emit('close')" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30"><i class="fas fa-times"></i></button>
+        </div>
         <div class="flex items-center space-x-4">
           <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-yellow-500"><i class="fas fa-crown text-3xl"></i></div>
           <div>
