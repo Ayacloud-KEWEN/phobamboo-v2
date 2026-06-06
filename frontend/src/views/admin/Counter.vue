@@ -86,12 +86,12 @@
               </div>
             </div>
 
-            <div class="p-4 flex-grow space-y-1 overflow-y-auto max-h-48">
-              <div v-for="(i, idx) in o.items" :key="idx" class="flex justify-between text-slate-300 text-sm">
-                <span>{{ i.quantity }}× {{ i.name }}</span>
-                <span>{{ (i.price * i.quantity).toFixed(2) }}</span>
+            <div class="p-4 flex-grow space-y-2 overflow-y-auto max-h-64">
+              <div v-for="(i, idx) in o.items" :key="idx" class="flex justify-between gap-2 text-white text-lg leading-snug">
+                <span><span class="font-black text-yellow-400 mr-1">{{ i.quantity }}×</span>{{ i.name }}</span>
+                <span class="text-slate-300 font-semibold whitespace-nowrap">{{ (i.price * i.quantity).toFixed(2) }}</span>
               </div>
-              <div v-if="o.notes" class="mt-2 text-xs text-red-300 bg-red-900/20 p-2 rounded border border-red-900/50">
+              <div v-if="o.notes" class="mt-2 text-base text-red-200 bg-red-900/30 p-2.5 rounded border border-red-900/50 font-medium">
                 <i class="fas fa-info-circle mr-1"></i>{{ o.notes }}
               </div>
             </div>
