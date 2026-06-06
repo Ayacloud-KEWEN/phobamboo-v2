@@ -18,6 +18,7 @@ import memberRoutes from './routes/members.js';
 import configRoutes from './routes/config.js';
 import uploadRoutes from './routes/upload.js';
 import statsRoutes from './routes/stats.js';
+import insightsRoutes from './routes/insights.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -58,7 +59,9 @@ const wrapAsync = (router) => {
   return router;
 };
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/insights/login', loginLimiter);
 app.use('/api/auth', wrapAsync(authRoutes));
+app.use('/api/insights', wrapAsync(insightsRoutes));
 app.use('/api/products', wrapAsync(productRoutes));
 app.use('/api/rewards', wrapAsync(rewardRoutes));
 app.use('/api/orders', wrapAsync(orderRoutes));

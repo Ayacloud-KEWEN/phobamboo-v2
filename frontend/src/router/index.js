@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useConfigStore } from '../stores/config';
+import { useInsightsAuthStore } from '../stores/insights';
 
 // Customer pages are mobile-first; admin pages are tablet/desktop.
 const routes = [
@@ -19,6 +20,10 @@ const routes = [
     component: () => import('../views/admin/Kds.vue'),
     meta: { auth: true, requiresKds: true },
   },
+  // Standalone sales/customer big-screen (separate login, NOT under /admin)
+  { path: '/insights/login', name: 'insights-login', component: () => import('../views/insights/Login.vue') },
+  { path: '/insights', name: 'insights', component: () => import('../views/insights/BigScreen.vue'), meta: { insights: true } },
+
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ];
 
@@ -40,5 +45,10 @@ router.beforeEach(async (to) => {
     const cfg = useConfigStore();
     if (!cfg.loaded) await cfg.load();
     if (!cfg.kdsEnabled) return { name: 'counter' };
+  }
+  // Big-screen has its own auth realm.
+  if (to.meta.insights) {
+    const ins = useInsightsAuthStore();
+    if (!ins.token) return { name: 'insights-login' };
   }
 });

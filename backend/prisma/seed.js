@@ -23,7 +23,19 @@ async function main() {
     update: { passwordHash, role: 'owner' },
   });
 
-  console.log(`✅ Seed done. Admin login: ${username} / ${password}`);
+  // Separate read-only "viewer" account for the sales/customer big-screen (/insights).
+  const vUser = process.env.SEED_VIEWER_USER || 'patron';
+  const vPass = process.env.SEED_VIEWER_PASS || 'patron';
+  const vHash = await bcrypt.hash(vPass, 10);
+  await prisma.adminUser.upsert({
+    where: { username: vUser },
+    create: { username: vUser, passwordHash: vHash, role: 'viewer' },
+    update: { passwordHash: vHash, role: 'viewer' },
+  });
+
+  console.log(`✅ Seed done.`);
+  console.log(`   Admin (back-office) : ${username} / ${password}`);
+  console.log(`   Viewer (grand écran): ${vUser} / ${vPass}`);
 }
 
 main()
