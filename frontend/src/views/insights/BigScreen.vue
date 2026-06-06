@@ -42,7 +42,61 @@
       </div>
     </div>
 
+    <!-- Management KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black text-emerald-400">{{ k.avgTicket.toFixed(2) }}€</p>
+        <p class="text-xs text-slate-400 mt-0.5">Panier moyen</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black">{{ k.weekRevenue.toFixed(0) }}€</p>
+        <p class="text-xs text-slate-400 mt-0.5">CA cette semaine</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black">{{ k.monthRevenue.toFixed(0) }}€</p>
+        <p class="text-xs text-slate-400 mt-0.5">CA ce mois</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black">{{ k.itemsPerOrder.toFixed(1) }}</p>
+        <p class="text-xs text-slate-400 mt-0.5">Articles / commande</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black text-yellow-400">{{ k.repeatRate }}%</p>
+        <p class="text-xs text-slate-400 mt-0.5">Clients fidèles (retour)</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <p class="text-2xl font-black text-purple-400">+{{ k.newMembers7d }}</p>
+        <p class="text-xs text-slate-400 mt-0.5">Nouveaux membres (7j)</p>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+      <!-- Peak hours -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <h2 class="font-bold text-slate-300 mb-4"><i class="fas fa-clock mr-2 text-amber-400"></i>Heures de pointe (commandes)</h2>
+        <div v-if="!peakHours.length" class="text-slate-500 text-center py-12">Aucune donnée.</div>
+        <div v-else class="flex items-end gap-1.5 h-44">
+          <div v-for="h in peakHours" :key="h.hour" class="flex-1 flex flex-col items-center justify-end group">
+            <span class="text-[9px] text-slate-400 mb-0.5">{{ h.count || '' }}</span>
+            <div class="w-full bg-amber-500 group-hover:bg-amber-400 rounded-t transition-all" :style="{ height: `${Math.max(3, (h.count / maxHour) * 100)}%` }" :title="`${h.hour}h: ${h.count} cmd · ${h.revenue}€`"></div>
+            <span class="text-[9px] text-slate-500 mt-1">{{ h.hour }}h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Splits -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <h2 class="font-bold text-slate-300 mb-4"><i class="fas fa-chart-pie mr-2 text-blue-400"></i>Répartition</h2>
+        <SplitBar label-a="Sur place" :a="k.dineIn.count" label-b="À emporter" :b="k.takeaway.count" color-a="bg-emerald-500" color-b="bg-blue-500" suffix="cmd" />
+        <div class="text-xs text-slate-500 mb-4 mt-1">{{ k.dineIn.revenue.toFixed(0) }}€ sur place · {{ k.takeaway.revenue.toFixed(0) }}€ à emporter</div>
+        <SplitBar label-a="Membres" :a="k.memberOrders" label-b="Invités" :b="k.guestOrders" color-a="bg-yellow-500" color-b="bg-slate-500" suffix="cmd" />
+        <div class="text-xs text-slate-500 mt-1">{{ k.memberRevenue.toFixed(0) }}€ membres · {{ k.guestRevenue.toFixed(0) }}€ invités</div>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between text-sm">
+          <span class="text-slate-400">Taux d'annulation</span>
+          <span class="font-bold" :class="k.cancelRate > 10 ? 'text-red-400' : 'text-slate-200'">{{ k.cancelRate }}%</span>
+        </div>
+      </div>
+
       <!-- Daily revenue -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
         <h2 class="font-bold text-slate-300 mb-4"><i class="fas fa-chart-column mr-2 text-blue-400"></i>Revenu — 14 derniers jours</h2>
@@ -117,6 +171,7 @@ import { useRouter } from 'vue-router';
 import iapi from '../../api/insightsClient';
 import { useInsightsAuthStore } from '../../stores/insights';
 import { useConfigStore } from '../../stores/config';
+import SplitBar from '../../components/insights/SplitBar.vue';
 
 const router = useRouter();
 const ins = useInsightsAuthStore();
@@ -127,23 +182,34 @@ const daily = ref([]);
 const topProducts = ref([]);
 const topMembers = ref([]);
 const recent = ref([]);
+const k = ref({
+  avgTicket: 0, itemsPerOrder: 0, weekRevenue: 0, monthRevenue: 0,
+  dineIn: { count: 0, revenue: 0 }, takeaway: { count: 0, revenue: 0 },
+  memberOrders: 0, guestOrders: 0, memberRevenue: 0, guestRevenue: 0,
+  repeatRate: 0, newMembers7d: 0, cancelRate: 0, hourly: [],
+});
 const clock = ref('');
 const lastUpdate = ref('—');
 
 const maxRev = computed(() => Math.max(1, ...daily.value.map((d) => d.revenue)));
+// Show typical opening hours (10h–23h) on the peak-hours chart.
+const peakHours = computed(() => (k.value.hourly || []).filter((h) => h.hour >= 10 && h.hour <= 23));
+const maxHour = computed(() => Math.max(1, ...peakHours.value.map((h) => h.count)));
 const today = computed(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
 const timeOf = (iso) => (iso ? new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
 
 async function loadAll() {
   try {
-    const [ov, dl, tp, tm, rc] = await Promise.all([
+    const [ov, kp, dl, tp, tm, rc] = await Promise.all([
       iapi.get('/api/insights/overview'),
+      iapi.get('/api/insights/kpis'),
       iapi.get('/api/insights/daily', { params: { days: 14 } }),
       iapi.get('/api/insights/top-products', { params: { days: 30 } }),
       iapi.get('/api/insights/top-members'),
       iapi.get('/api/insights/recent-orders'),
     ]);
     o.value = ov.data;
+    k.value = kp.data;
     daily.value = dl.data;
     topProducts.value = tp.data;
     topMembers.value = tm.data;

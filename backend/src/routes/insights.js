@@ -52,6 +52,82 @@ router.get('/overview', requireInsights, async (req, res) => {
   });
 });
 
+function startOfWeek() {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7; // Monday = 0
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function startOfMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+// GET /api/insights/kpis — restaurant management KPIs (best-practice metrics).
+router.get('/kpis', requireInsights, async (req, res) => {
+  const [paid, cancelledCount, newMembers7d] = await Promise.all([
+    prisma.order.findMany({
+      where: { status: 'paid' },
+      select: { total: true, table: true, phone: true, items: true, createdAt: true },
+    }),
+    prisma.order.count({ where: { status: 'cancelled' } }),
+    prisma.member.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 86400e3) } } }),
+  ]);
+
+  const n = paid.length || 1;
+  const revenue = paid.reduce((s, o) => s + o.total, 0);
+  const itemsTotal = paid.reduce(
+    (s, o) => s + (Array.isArray(o.items) ? o.items.reduce((a, i) => a + (i.quantity || 0), 0) : 0),
+    0
+  );
+
+  const sow = startOfWeek();
+  const som = startOfMonth();
+  const weekRevenue = paid.filter((o) => o.createdAt >= sow).reduce((s, o) => s + o.total, 0);
+  const monthRevenue = paid.filter((o) => o.createdAt >= som).reduce((s, o) => s + o.total, 0);
+
+  // Dine-in vs takeaway (table set = dine-in).
+  const dineIn = paid.filter((o) => o.table);
+  const takeaway = paid.filter((o) => !o.table);
+  // Member vs guest.
+  const memberO = paid.filter((o) => o.phone);
+  const guestO = paid.filter((o) => !o.phone);
+  // Repeat customers (members with >= 2 paid orders).
+  const byPhone = {};
+  for (const o of memberO) byPhone[o.phone] = (byPhone[o.phone] || 0) + 1;
+  const customers = Object.keys(byPhone).length || 1;
+  const repeat = Object.values(byPhone).filter((c) => c >= 2).length;
+
+  // Order count by hour of day (0–23).
+  const hourly = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: 0, revenue: 0 }));
+  for (const o of paid) {
+    const h = new Date(o.createdAt).getHours();
+    hourly[h].count += 1;
+    hourly[h].revenue += o.total;
+  }
+
+  const r2 = (x) => Number(x.toFixed(2));
+  res.json({
+    avgTicket: r2(revenue / n),
+    itemsPerOrder: r2(itemsTotal / n),
+    weekRevenue: r2(weekRevenue),
+    monthRevenue: r2(monthRevenue),
+    dineIn: { count: dineIn.length, revenue: r2(dineIn.reduce((s, o) => s + o.total, 0)) },
+    takeaway: { count: takeaway.length, revenue: r2(takeaway.reduce((s, o) => s + o.total, 0)) },
+    memberOrders: memberO.length,
+    guestOrders: guestO.length,
+    memberRevenue: r2(memberO.reduce((s, o) => s + o.total, 0)),
+    guestRevenue: r2(guestO.reduce((s, o) => s + o.total, 0)),
+    repeatCustomers: repeat,
+    totalCustomers: Object.keys(byPhone).length,
+    repeatRate: Math.round((repeat / customers) * 100),
+    newMembers7d,
+    cancelRate: Math.round((cancelledCount / (paid.length + cancelledCount || 1)) * 100),
+    hourly: hourly.map((h) => ({ ...h, revenue: r2(h.revenue) })),
+  });
+});
+
 // GET /api/insights/daily?days=30
 router.get('/daily', requireInsights, async (req, res) => {
   const orders = await prisma.order.findMany({
